@@ -12,11 +12,13 @@ export class AuthController {
     return this.authService.signUp(body);
   }
 
+  //TODO => after passport complete.
   @Post('fullRegister')
   async fullRegister(@Body() body: FullRegisterDto): Promise<any> {
     return this.authService.fullRegister(body);
   }
 
+  //TODO => after passport
   @Post('sigIn')
   async signIn(@Body() body: CreateDto): Promise<any> {}
 }

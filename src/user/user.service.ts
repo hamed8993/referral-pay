@@ -45,7 +45,7 @@ export class UserService {
     }
   }
 
-  async updateUser(user: IFullRegister): Promise<any> {
+  async fullRegisterUser(user: IFullRegister): Promise<any> {
     return await this.userRepo.update(
       { email: user.email },
       { fullName: user.firstName + ' ' + user.lastName },

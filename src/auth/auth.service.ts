@@ -17,6 +17,6 @@ export class AuthService {
   async fullRegister(body: IFullRegister): Promise<any> {
     const userByEmail = await this.userService.findOneByEmail(body.email);
     if (!userByEmail) throw new BadRequestException('User not found');
-    return await this.userService.updateUser(body);
+    return await this.userService.fullRegisterUser(body);
   }
 }
