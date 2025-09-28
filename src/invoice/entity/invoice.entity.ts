@@ -10,6 +10,7 @@ import {
   ManyToOne,
   OneToOne,
 } from 'typeorm';
+import { Decimal } from 'decimal.js';
 
 @Entity()
 export class Invoice extends CommonEntity {
@@ -41,10 +42,10 @@ export class Invoice extends CommonEntity {
   @Column({ unique: true })
   invoiceNumber: string;
 
-  @Column({ nullable: true })
+  @Column()
   paymentGateway: string;
 
-  @Column({ nullable: true })
+  @Column()
   paymentReference: string;
 
   @Column({ nullable: true })
@@ -70,6 +71,11 @@ export class Invoice extends CommonEntity {
   @BeforeInsert()
   @BeforeUpdate()
   calculateTotalAmount() {
-    this.totalAmount = this.subtotal - this.discount + this.tax;
+    const subtotal = new Decimal(this.subtotal || 0);
+    const tax = new Decimal(this.tax || 0);
+    const discount = new Decimal(this.discount || 0);
+    
+    console.log(">>>>>>>>>>",subtotal.plus(tax).minus(discount).toNumber())
+    this.totalAmount = subtotal.plus(tax).minus(discount).toNumber();
   }
 }

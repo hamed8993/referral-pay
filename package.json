@@ -30,6 +30,7 @@
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "decimal.js": "^10.6.0",
     "mysql2": "^3.15.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
