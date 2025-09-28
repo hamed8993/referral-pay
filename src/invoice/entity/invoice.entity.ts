@@ -1,4 +1,3 @@
-import { CommonEntity } from 'src/common/entities/common.entity';
 import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
 import { Transaction } from 'src/transaction/entity/transaction.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -11,9 +10,10 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Decimal } from 'decimal.js';
+import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tranaction.entity';
 
 @Entity()
-export class Invoice extends CommonEntity {
+export class Invoice extends SharedInvoiceTranaction {
   @Column('decimal', { precision: 18, scale: 2 })
   subtotal: number;
 
@@ -32,12 +32,6 @@ export class Invoice extends CommonEntity {
     default: InvoiceStatus.PENDING,
   })
   status: InvoiceStatus;
-
-  @Column()
-  title: string;
-
-  @Column({ nullable: true })
-  description: string;
 
   @Column({ unique: true })
   invoiceNumber: string;
@@ -74,8 +68,19 @@ export class Invoice extends CommonEntity {
     const subtotal = new Decimal(this.subtotal || 0);
     const tax = new Decimal(this.tax || 0);
     const discount = new Decimal(this.discount || 0);
-    
-    console.log(">>>>>>>>>>",subtotal.plus(tax).minus(discount).toNumber())
+
     this.totalAmount = subtotal.plus(tax).minus(discount).toNumber();
+  }
+
+  @BeforeInsert()
+  generateInvoiceNumber() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const time = date.getTime().toString().slice(-4);
+    const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+
+    this.invoiceNumber = `INV-${year}${month}${day}-${time}-${random}`;
   }
 }

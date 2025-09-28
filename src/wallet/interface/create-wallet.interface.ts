@@ -4,9 +4,10 @@ import { Transaction } from 'typeorm';
 export interface ICreateWallet {
   balance: number;
 
-  user: User;
+  userId: number;
 
-  transactions: Transaction[];
+  name: string;
 
   currency: string;
+  
 }

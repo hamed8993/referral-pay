@@ -1,8 +1,7 @@
-import { CommonEntity } from 'src/common/entities/common.entity';
-import { TransactionType } from 'src/common/enums/invoice-type.enum';
+import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tranaction.entity';
+import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { Invoice } from 'src/invoice/entity/invoice.entity';
 import { User } from 'src/user/entity/user.entity';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -15,12 +14,9 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Transaction extends CommonEntity {
+export class Transaction extends SharedInvoiceTranaction {
   @ManyToOne(() => User, (user) => user.transactions)
   user: User;
-
-  @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
-  wallet: Wallet;
 
   @OneToOne(() => Invoice, (invoice) => invoice.transaction)
   @JoinColumn()
@@ -34,15 +30,6 @@ export class Transaction extends CommonEntity {
 
   @Column('decimal', { precision: 18, scale: 2 })
   netAmount: number;
-
-  @Column({
-    type: 'enum',
-    enum: TransactionType,
-  })
-  type: TransactionType;
-
-  @Column({ nullable: true })
-  description: string;
 
   @Column({ nullable: true })
   transactionTracingCode: string;

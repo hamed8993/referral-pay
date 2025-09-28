@@ -19,6 +19,14 @@ export class UserService {
     });
   }
 
+  async findOneById(id: number): Promise<any> {
+    return await this.userRepo.findOne({
+      where: {
+        id,
+      },
+    });
+  }
+
   async createUser(user: ICreate): Promise<any> {
     if (user.referralCode) {
       const parentUserByRefCode = await this.userRepo.findOne({
