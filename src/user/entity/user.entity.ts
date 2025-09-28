@@ -1,4 +1,8 @@
 import { CommonEntity } from 'src/common/common.entity';
+import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
+import { RoleEnum } from 'src/common/enums/role.enum';
+import { UserLevel } from 'src/common/enums/user-level.enum';
+import { UserStatus } from 'src/common/enums/user-status.enum';
 import { Invoice } from 'src/invoice/entity/invoice.entity';
 import { Transaction } from 'src/transaction/enum/transaction.entity';
 import { Wallet } from 'src/wallet/entity/wallet.entity';
@@ -6,9 +10,6 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends CommonEntity {
-  @OneToMany(() => Wallet, (wallet) => wallet.user, { onDelete: 'CASCADE' })
-  wallets: Wallet[];
-
   @Column({ unique: true })
   email: string;
 
@@ -21,12 +22,27 @@ export class User extends CommonEntity {
   @Column({ nullable: true })
   fullName: string;
 
-  //fullname // {nullable:true}
+  @Column('enum', { enum: RoleEnum, default: RoleEnum.USER })
+  role: RoleEnum;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.user)
+  @Column('enum', { enum: UserStatus, default: UserStatus.ACTIVE })
+  status: UserStatus;
+
+  @Column('enum', { enum: EnrollmentStatus, default: EnrollmentStatus.BASIC })
+  enrollment: EnrollmentStatus;
+
+  @Column('enum', { enum: UserLevel, default: UserLevel.ONE })
+  level: UserLevel;
+
+  @OneToMany(() => Wallet, (wallet) => wallet.user, { onDelete: 'CASCADE' })
+  wallets: Wallet[];
+
+  @OneToMany(() => Invoice, (invoice) => invoice.user, { onDelete: 'CASCADE' })
   invoices: Invoice[];
 
-  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  @OneToMany(() => Transaction, (transaction) => transaction.user, {
+    onDelete: 'CASCADE',
+  })
   transactions: Transaction[];
 
   @OneToMany(() => User, (user) => user.parent)
