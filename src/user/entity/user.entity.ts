@@ -1,10 +1,10 @@
-import { CommonEntity } from 'src/common/common.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { UserLevel } from 'src/common/enums/user-level.enum';
 import { UserStatus } from 'src/common/enums/user-status.enum';
 import { Invoice } from 'src/invoice/entity/invoice.entity';
-import { Transaction } from 'src/transaction/enum/transaction.entity';
+import { Transaction } from 'src/transaction/entity/transaction.entity';
 import { Wallet } from 'src/wallet/entity/wallet.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 

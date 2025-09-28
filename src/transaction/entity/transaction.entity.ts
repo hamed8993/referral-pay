@@ -1,4 +1,4 @@
-import { CommonEntity } from 'src/common/common.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { TransactionType } from 'src/common/enums/invoice-type.enum';
 import { Invoice } from 'src/invoice/entity/invoice.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -22,7 +22,7 @@ export class Transaction extends CommonEntity {
   @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
   wallet: Wallet;
 
-  @OneToOne(() => Invoice, invoice=>invoice.transaction)
+  @OneToOne(() => Invoice, (invoice) => invoice.transaction)
   @JoinColumn()
   invoice: Invoice;
 
@@ -49,7 +49,6 @@ export class Transaction extends CommonEntity {
 
   @Column({ nullable: true })
   processedBy: number;
-
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -1,6 +1,6 @@
-import { CommonEntity } from 'src/common/common.entity';
+import { CommonEntity } from 'src/common/entities/common.entity';
 import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
-import { Transaction } from 'src/transaction/enum/transaction.entity';
+import { Transaction } from 'src/transaction/entity/transaction.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   BeforeInsert,
