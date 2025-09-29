@@ -1,7 +1,10 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -92,69 +95,113 @@ export class InvoiceService {
     });
     if (!existInvoice) throw new NotFoundException('Such a invoice not exist!');
 
-    if (body.status === InvoiceStatus.REJECTED) {
-      return await this.invoiceRepo.update(
-        { invoiceNumber: body.invoiceNumber },
-        {
-          status: InvoiceStatus.REJECTED,
-          adminNote: body.adminNote,
-          processedAt: new Date(),
-          processedBy: 3,
-        },
-      );
-    } else if (body.status === InvoiceStatus.SUBMITTED) {
-      return this.dataSource.transaction(async (manager) => {
-        await manager.update(
-          Invoice,
-          {
-            invoiceNumber: body.invoiceNumber,
-          },
-          {
-            status: InvoiceStatus.SUBMITTED,
-            adminNote: body.adminNote,
-            processedAt: new Date(),
-            processedBy: 3,
-          },
+    switch (existInvoice.status) {
+      case InvoiceStatus.REJECTED:
+        throw new BadRequestException('already have been rejected!');
+        break;
+
+      case InvoiceStatus.SUBMITTED:
+        throw new BadRequestException('already have been submitted!');
+        break;
+
+      case InvoiceStatus.CANCELLED:
+        throw new BadRequestException(
+          'already have been rejcancelled by user!',
         );
+        break;
 
-        const newTransaction = await manager.create(Transaction, {
-          processedBy: 3,
-          type: existInvoice.type,
-          amount: existInvoice.totalAmount,
-          fee: 0, //===>??????
-          invoice: existInvoice,
-          title: existInvoice.title,
-          wallet: existInvoice.wallet,
-          user: existInvoice.user,
-          description: existInvoice.description, //?????
-          transactionTracingCode: '????', //??????
-        });
-        await manager.save(Transaction, newTransaction);
+      default:
+        if (body.status === InvoiceStatus.REJECTED) {
+          const result = await this.invoiceRepo.update(
+            { invoiceNumber: body.invoiceNumber },
+            {
+              status: InvoiceStatus.REJECTED,
+              adminNote: body.adminNote,
+              processedAt: new Date(),
+              processedBy: 3,
+            },
+          );
+          if (result.affected === 0)
+            throw new BadRequestException('Update failed!');
 
-        let walletNewBalance = 0;
-        if (existInvoice.type === TransactionType.DEPOSIT) {
-          walletNewBalance = new Decimal(existInvoice.wallet.balance)
-            .plus(existInvoice.totalAmount)
-            .toNumber();
-        } else if (existInvoice.type === TransactionType.WITHDRAWAL) {
-          if (existInvoice.subtotal > existInvoice.wallet.balance) {
-            throw new ForbiddenException(
-              'amount of invoice <subtotal> is greater than wallet balance!',
-            );
-          }
-          walletNewBalance = new Decimal(existInvoice.wallet.balance)
-            .minus(existInvoice.totalAmount)
-            .toNumber();
+          return {
+            success: true,
+            message: 'Invoice rejected successfully',
+            data: result,
+          };
+        } else if (body.status === InvoiceStatus.SUBMITTED) {
+          return this.dataSource.transaction(async (manager) => {
+            try {
+              //1)INVOICE:
+              const resInvoice = await manager.update(
+                Invoice,
+                {
+                  invoiceNumber: body.invoiceNumber,
+                },
+                {
+                  status: InvoiceStatus.SUBMITTED,
+                  adminNote: body.adminNote,
+                  processedAt: new Date(),
+                  processedBy: 3,
+                },
+              );
+              if ((resInvoice.affected = 0))
+                throw new InternalServerErrorException('Invoice failed!');
+
+              //2)TRANSACTION:
+              const newTransaction = await manager.create(Transaction, {
+                processedBy: 3,
+                type: existInvoice.type,
+                amount: existInvoice.totalAmount,
+                fee: 0, //===>??????
+                invoice: existInvoice,
+                title: existInvoice.title,
+                wallet: existInvoice.wallet,
+                user: existInvoice.user,
+                description: existInvoice.description, //?????
+                transactionTracingCode: '????', //??????
+              });
+              await manager.save(Transaction, newTransaction);
+
+              //3)Wallet:
+              let walletNewBalance = 0;
+              if (existInvoice.type === TransactionType.DEPOSIT) {
+                walletNewBalance = new Decimal(existInvoice.wallet.balance)
+                  .plus(existInvoice.totalAmount)
+                  .toNumber();
+              } else if (existInvoice.type === TransactionType.WITHDRAWAL) {
+                if (existInvoice.subtotal > existInvoice.wallet.balance) {
+                  throw new ForbiddenException(
+                    `amount of invoice <subtotal:${existInvoice.subtotal}> is greater than <wallet balance:${existInvoice.wallet.balance}>!`,
+                  );
+                }
+                walletNewBalance = new Decimal(existInvoice.wallet.balance)
+                  .minus(existInvoice.totalAmount)
+                  .toNumber();
+              }
+              const resWllet = await manager.update(
+                Wallet,
+                { id: existInvoice.wallet.id },
+                {
+                  balance: walletNewBalance,
+                },
+              );
+              if ((resWllet.affected = 0))
+                throw new InternalServerErrorException('Wallet failed!');
+
+              //send message...
+            } catch (error) {
+              throw new HttpException(
+                {
+                  success: false,
+                  message: 'Submittion failed!',
+                  details: error.message,
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+              );
+            }
+          });
         }
-
-        await manager.update(
-          Wallet,
-          { id: existInvoice.wallet.id },
-          {
-            balance: walletNewBalance,
-          },
-        );
-      });
     }
   }
 }
