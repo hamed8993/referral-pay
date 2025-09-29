@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { WalletModule } from './wallet/wallet.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { WalletModule } from './wallet/wallet.module';
     UserModule,
     AuthModule,
     InvoiceModule,
-    WalletModule
+    WalletModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

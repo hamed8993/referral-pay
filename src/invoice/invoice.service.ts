@@ -20,6 +20,7 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { Wallet } from 'src/wallet/entity/wallet.entity';
 import Decimal from 'decimal.js';
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
+import { EmailProducer } from 'src/queue/producers/email.producer';
 
 @Injectable()
 export class InvoiceService {
@@ -28,6 +29,7 @@ export class InvoiceService {
     @InjectRepository(Invoice) private invoiceRepo: Repository<Invoice>,
     private dataSource: DataSource,
     private walletService: WalletService,
+    private emailProducer: EmailProducer,
   ) {}
 
   async createInvoice(body: ICreateInvoice): Promise<any> {
@@ -91,7 +93,13 @@ export class InvoiceService {
       where: {
         invoiceNumber: body.invoiceNumber,
       },
-      relations: ['wallet'],
+      // relations: ['wallet', 'user'],
+      relations: {
+        wallet: true,
+        user: {
+          parent: true,
+        },
+      },
     });
     if (!existInvoice) throw new NotFoundException('Such a invoice not exist!');
 
@@ -170,15 +178,20 @@ export class InvoiceService {
                   .plus(existInvoice.totalAmount)
                   .toNumber();
               } else if (existInvoice.type === TransactionType.WITHDRAWAL) {
-                if (existInvoice.subtotal > existInvoice.wallet.balance) {
+                if (
+                  new Decimal(existInvoice.totalAmount).greaterThan(
+                    new Decimal(existInvoice.wallet.balance),
+                  )
+                ) {
                   throw new ForbiddenException(
-                    `amount of invoice <subtotal:${existInvoice.subtotal}> is greater than <wallet balance:${existInvoice.wallet.balance}>!`,
+                    `amount of invoice <totalAmount:${existInvoice.totalAmount}> is greater than <wallet balance:${existInvoice.wallet.balance}>!`,
                   );
                 }
                 walletNewBalance = new Decimal(existInvoice.wallet.balance)
                   .minus(existInvoice.totalAmount)
                   .toNumber();
               }
+             
               const resWllet = await manager.update(
                 Wallet,
                 { id: existInvoice.wallet.id },
@@ -190,6 +203,35 @@ export class InvoiceService {
                 throw new InternalServerErrorException('Wallet failed!');
 
               //send message...
+              //to invoicer..
+              this.emailProducer.addSendMail({
+                sendTo: existInvoice.user.email,
+                transActionType: existInvoice.type,
+                transActionAmount: existInvoice.totalAmount,
+                walletBalance: walletNewBalance,
+                transActionDate: new Date(),
+              });
+              //to parent of invoicer (if exist):
+              if (existInvoice.user.parent.email) {
+                this.emailProducer.addSendMail({
+                  sendTo: existInvoice.user.parent.email,
+                  //Todo=>insert admin by cookie
+                  by: 'ADMIN FROM COOKIE!',
+                  transActionType: existInvoice.type,
+                  transActionAmount: existInvoice.totalAmount,
+                  transActionDate: new Date(),
+                });
+              }
+              return {
+                success: true,
+                status: 201,
+                result: {
+                  for: existInvoice.user.email,
+                  transActionType: existInvoice.type,
+                  transActionAmount: existInvoice.totalAmount,
+                  transActionDate: new Date(),
+                },
+              };
             } catch (error) {
               throw new HttpException(
                 {
