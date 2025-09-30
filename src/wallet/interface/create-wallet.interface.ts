@@ -1,6 +1,3 @@
-import { User } from 'src/user/entity/user.entity';
-import { Transaction } from 'typeorm';
-
 export interface ICreateWallet {
   balance: number;
 
@@ -9,5 +6,4 @@ export interface ICreateWallet {
   name: string;
 
   currency: string;
-  
 }

@@ -10,6 +10,11 @@ import { QueueModule } from 'src/queue/queue.module';
 @Module({
   controllers: [InvoiceController],
   providers: [InvoiceService],
-  imports: [TypeOrmModule.forFeature([Invoice]), UserModule, WalletModule,QueueModule],
+  imports: [
+    TypeOrmModule.forFeature([Invoice]),
+    UserModule,
+    WalletModule,
+    QueueModule,
+  ],
 })
 export class InvoiceModule {}

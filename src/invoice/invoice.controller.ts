@@ -23,6 +23,6 @@ export class InvoiceController {
   //Todo=>insert admin by cookie
   @Post('admin')
   async processByAdmin(@Body() body: ProcessInvoiceDto): Promise<any> {
-    return this.invoiceService.processByAdmin(body)
+    return this.invoiceService.processByAdmin(body);
   }
 }

@@ -2,7 +2,7 @@ import { TransactionType } from 'src/common/enums/transaction-type.enum';
 
 export interface MessageInterface {
   sendTo: string;
-  by?: string,
+  by?: string;
   transActionType: TransactionType;
   transActionAmount: number;
   walletBalance?: number;

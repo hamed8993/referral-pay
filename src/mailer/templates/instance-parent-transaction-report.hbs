@@ -1,0 +1,52 @@
+<!-- src/mail/templates/transaction-report.hbs -->
+
+<html dir='rtl'>
+  <head>
+    <meta charset='UTF-8' />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        direction: rtl;
+      }
+      .header {
+        background: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+      }
+      .transaction {
+        border: 1px solid #ddd;
+        margin: 10px 0;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      .deposite {
+        border-right: 4px solid #28a745;
+      }
+      .withdrawal {
+        border-right: 4px solid #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='header'>
+      <h1>گزارش تراکنش‌</h1>
+      <p>تاریخ: {{date}}</p>
+    </div>
+
+    <div class='transaction {{type}}'>
+      <h3>
+        <strong> تراکنش:</strong>
+      </h3>
+      <p>
+        <strong>نوع:</strong>
+        {{type}}
+      </p>
+      <p>
+        <strong>مبلغ خالص:</strong>
+        {{this.amount}}
+        تومان
+      </p>
+    </div>
+
+  </body>
+</html>

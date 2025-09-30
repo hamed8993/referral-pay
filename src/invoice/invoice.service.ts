@@ -74,6 +74,11 @@ export class InvoiceService {
       where: {
         invoiceNumber: body.invoiceNumber,
       },
+      relations: {
+        user: {
+          parent: true,
+        },
+      },
     });
     if (!existInvoice) throw new NotFoundException('Such a invoice not exist!');
     return await this.invoiceRepo.update(
@@ -120,17 +125,29 @@ export class InvoiceService {
 
       default:
         if (body.status === InvoiceStatus.REJECTED) {
-          const result = await this.invoiceRepo.update(
-            { invoiceNumber: body.invoiceNumber },
-            {
-              status: InvoiceStatus.REJECTED,
-              adminNote: body.adminNote,
-              processedAt: new Date(),
-              processedBy: 3,
-            },
-          );
-          if (result.affected === 0)
-            throw new BadRequestException('Update failed!');
+          existInvoice.status = InvoiceStatus.REJECTED;
+          existInvoice.adminNote = body.adminNote;
+          existInvoice.processedAt = new Date();
+          existInvoice.processedBy = 3;
+          const result = await this.invoiceRepo.save(existInvoice);
+          if (!result) throw new BadRequestException('Update failed!');
+
+          this.emailProducer.addInstanceEmailQueueJob({
+            userEmail: existInvoice.user.email,
+            type: existInvoice.type,
+            amount: existInvoice.totalAmount,
+
+            title: existInvoice.title,
+            description: existInvoice.description || '-',
+            fee: 0,
+            netAmount: existInvoice.totalAmount,
+            invoiceNumber: existInvoice.invoiceNumber,
+            //Todo=>insert admin by cookie
+            processedBy: 'ADMIN FROM COOKIE!',
+            processDescription: existInvoice.adminNote,
+            walletId: NaN,
+            status: InvoiceStatus.REJECTED,
+          });
 
           return {
             success: true,
@@ -153,11 +170,11 @@ export class InvoiceService {
                   processedBy: 3,
                 },
               );
-              if ((resInvoice.affected = 0))
+              if (resInvoice.affected == 0)
                 throw new InternalServerErrorException('Invoice failed!');
 
               //2)TRANSACTION:
-              const newTransaction = await manager.create(Transaction, {
+              const newTransaction = manager.create(Transaction, {
                 processedBy: 3,
                 type: existInvoice.type,
                 amount: existInvoice.totalAmount,
@@ -191,7 +208,7 @@ export class InvoiceService {
                   .minus(existInvoice.totalAmount)
                   .toNumber();
               }
-             
+
               const resWllet = await manager.update(
                 Wallet,
                 { id: existInvoice.wallet.id },
@@ -199,27 +216,33 @@ export class InvoiceService {
                   balance: walletNewBalance,
                 },
               );
-              if ((resWllet.affected = 0))
+              if (resWllet.affected == 0)
                 throw new InternalServerErrorException('Wallet failed!');
 
               //send message...
-              //to invoicer..
-              this.emailProducer.addSendMail({
-                sendTo: existInvoice.user.email,
-                transActionType: existInvoice.type,
-                transActionAmount: existInvoice.totalAmount,
-                walletBalance: walletNewBalance,
-                transActionDate: new Date(),
+              // //to invoicer..
+              await this.emailProducer.addInstanceEmailQueueJob({
+                userEmail: existInvoice.user.email,
+                type: existInvoice.type,
+                amount: existInvoice.totalAmount,
+
+                title: newTransaction.title,
+                description: newTransaction.description || '-',
+                fee: newTransaction.fee,
+                netAmount: newTransaction.netAmount,
+                invoiceNumber: existInvoice.invoiceNumber,
+                //Todo=>insert admin by cookie
+                processedBy: 'ADMIN FROM COOKIE!',
+                processDescription: existInvoice.adminNote,
+                walletId: newTransaction.wallet.id,
+                status: InvoiceStatus.SUBMITTED,
               });
               //to parent of invoicer (if exist):
-              if (existInvoice.user.parent.email) {
-                this.emailProducer.addSendMail({
-                  sendTo: existInvoice.user.parent.email,
-                  //Todo=>insert admin by cookie
-                  by: 'ADMIN FROM COOKIE!',
-                  transActionType: existInvoice.type,
-                  transActionAmount: existInvoice.totalAmount,
-                  transActionDate: new Date(),
+              if (existInvoice.user.parent && existInvoice.user.parent?.email) {
+                await this.emailProducer.addInstanceEmailQueueJob({
+                  parentEmail: existInvoice.user.parent.email,
+                  type: existInvoice.type,
+                  amount: existInvoice.totalAmount,
                 });
               }
               return {

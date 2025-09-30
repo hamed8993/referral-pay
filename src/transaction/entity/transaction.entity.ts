@@ -9,7 +9,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   OneToOne,
 } from 'typeorm';
 

@@ -11,5 +11,5 @@ export interface ICreateInvoice {
 
   invoiceType: TransactionType;
 
-  walletId: number
+  walletId: number;
 }

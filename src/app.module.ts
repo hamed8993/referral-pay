@@ -8,6 +8,9 @@ import { AuthModule } from './auth/auth.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { WalletModule } from './wallet/wallet.module';
 import { QueueModule } from './queue/queue.module';
+import { JobModule } from './jobs/job.module';
+import { TransactionModule } from './transaction/transaction.module';
+import { MailModule } from './mailer/mail.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { QueueModule } from './queue/queue.module';
     InvoiceModule,
     WalletModule,
     QueueModule,
+    JobModule,
+    TransactionModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

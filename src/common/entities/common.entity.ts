@@ -14,7 +14,7 @@ export abstract class CommonEntity {
 
   @UpdateDateColumn()
   updated_at: Date;
-  
+
   @DeleteDateColumn()
   deleted_at: Date;
 }
