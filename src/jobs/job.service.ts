@@ -10,7 +10,7 @@ export class JobService {
     private emailProducer: EmailProducer,
   ) {}
 
-  @Cron('12 46 * * * *')
+  @Cron('01 00 * * *')
   async handleSendDailyReportEmail(): Promise<any> {
     const res = await this.TransactionService.getAllRecordsByParent();
 
