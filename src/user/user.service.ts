@@ -6,6 +6,7 @@ import { ICreate } from './interface/create.interface';
 import { IFullRegister } from './interface/full-register.interface';
 import { generateReferral } from 'src/common/helpers/generate-referral.helper';
 import { hashPassword } from 'src/common/helpers/hash-password.helper';
+import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 
 @Injectable()
 export class UserService {
@@ -56,7 +57,10 @@ export class UserService {
   async fullRegisterUser(user: IFullRegister): Promise<any> {
     return await this.userRepo.update(
       { email: user.email },
-      { fullName: user.firstName + ' ' + user.lastName },
+      {
+        fullName: user.firstName + ' ' + user.lastName,
+        enrollment: EnrollmentStatus.FULLY,
+      },
     );
   }
 }
