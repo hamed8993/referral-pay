@@ -12,7 +12,6 @@ import {
   LoginReturnedRequest,
 } from './interfaces/payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { hash } from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -59,7 +58,6 @@ export class AuthService {
 
   async signIn(id: number, email: string) {
     const accessToken = await this.generateTokensForLogin(id, email);
-    const hashedAccessToken = await hash(accessToken);
     return accessToken;
   }
 
@@ -68,7 +66,7 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('User Not Found!');
     const currentUser = {
       id: user.id,
-      // role: user.role,
+      role: user.role,
     };
     return currentUser;
   }
