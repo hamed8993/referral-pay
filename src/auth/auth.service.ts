@@ -1,11 +1,25 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { verifyPassword } from 'src/common/helpers/hash-password.helper';
 import { ICreate } from 'src/user/interface/create.interface';
 import { IFullRegister } from 'src/user/interface/full-register.interface';
 import { UserService } from 'src/user/user.service';
+import {
+  AuthJwtPayload,
+  LoginReturnedRequest,
+} from './interfaces/payload.interface';
+import { JwtService } from '@nestjs/jwt';
+import { hash } from 'argon2';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
   async signUp(body: ICreate): Promise<any> {
     const existUserAllready = await this.userService.findOneByEmail(body.email);
@@ -18,5 +32,44 @@ export class AuthService {
     const userByEmail = await this.userService.findOneByEmail(body.email);
     if (!userByEmail) throw new BadRequestException('User not found');
     return await this.userService.fullRegisterUser(body);
+  }
+
+  async validateLocalUser(
+    email: string,
+    password: string,
+  ): Promise<LoginReturnedRequest> {
+    const existUser = await this.userService.findOneByEmail(email);
+    if (!existUser) throw new UnauthorizedException('Such a user not found!');
+    const isPasswordValid = await verifyPassword(password, existUser.password);
+
+    if (!isPasswordValid)
+      throw new UnauthorizedException('invalid credentials');
+
+    return {
+      id: existUser.id,
+      email: existUser.email,
+    };
+  }
+
+  async generateTokensForLogin(id: number, email: string) {
+    const payload: AuthJwtPayload = { sub: id, email };
+    const accessToken = await this.jwtService.signAsync(payload);
+    return accessToken;
+  }
+
+  async signIn(id: number, email: string) {
+    const accessToken = await this.generateTokensForLogin(id, email);
+    const hashedAccessToken = await hash(accessToken);
+    return accessToken;
+  }
+
+  async validateJwtUser(userId: number) {
+    const user = await this.userService.findOneById(userId);
+    if (!user) throw new UnauthorizedException('User Not Found!');
+    const currentUser = {
+      id: user.id,
+      // role: user.role,
+    };
+    return currentUser;
   }
 }

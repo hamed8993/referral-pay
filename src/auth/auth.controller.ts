@@ -1,7 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { CreateDto } from 'src/user/dto/create.dto';
 import { FullRegisterDto } from 'src/user/dto/full-register.dto';
 import { AuthService } from './auth.service';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { LoginReturnedRequest } from './interfaces/payload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -18,9 +20,11 @@ export class AuthController {
     return this.authService.fullRegister(body);
   }
 
-  //TODO => after passport
-  // @Post('sigIn')
-  // async signIn(@Body() body: CreateDto): Promise<any> {
-
-  // }
+  //Done => after passport
+  @UseGuards(LocalAuthGuard)
+  @Post('sigIn')
+  async signIn(@Request() req): Promise<any> {
+    const { id, email }: LoginReturnedRequest = req.user;
+    return this.authService.signIn(id, email);
+  }
 }
