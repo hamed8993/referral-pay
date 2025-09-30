@@ -13,7 +13,6 @@ export class JobService {
   @Cron('01 00 * * *')
   async handleSendDailyReportEmail(): Promise<any> {
     const res = await this.TransactionService.getAllRecordsByParent();
-
     await this.emailProducer.addBatchEmailsJob(res);
     // this.mailService.sendDailyTransactionsReport(res);
     // [

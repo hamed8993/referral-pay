@@ -12,13 +12,19 @@ export class TransactionService {
   ) {}
 
   async getAllLastOneDayRecords(): Promise<any> {
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+    const now = new Date();
+
+    // امروز ۰۰:۰۰:۰۰
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    // دیروز ۰۰:۰۰:۰۰
+    const startOfYesterday = new Date(startOfToday);
+    startOfYesterday.setDate(startOfToday.getDate() - 1);
 
     return await this.transactionRepo.find({
       where: {
-        created_at: Between(startOfDay, endOfDay),
+        created_at: Between(startOfYesterday, startOfToday),
         user: {
           parent: Not(IsNull()),
         },

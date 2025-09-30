@@ -56,6 +56,7 @@ export class AuthService {
     return accessToken;
   }
 
+  
   async signIn(id: number, email: string) {
     const accessToken = await this.generateTokensForLogin(id, email);
     return accessToken;
