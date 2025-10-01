@@ -9,7 +9,8 @@ import { IFullRegister } from 'src/user/interface/full-register.interface';
 import { UserService } from 'src/user/user.service';
 import {
   AuthJwtPayload,
-  LoginReturnedRequest,
+  ValidatedLoginReq,
+  ValidatedJwtUser,
 } from './interfaces/payload.interface';
 import { JwtService } from '@nestjs/jwt';
 
@@ -36,7 +37,7 @@ export class AuthService {
   async validateLocalUser(
     email: string,
     password: string,
-  ): Promise<LoginReturnedRequest> {
+  ): Promise<ValidatedLoginReq> {
     const existUser = await this.userService.findOneByEmail(email);
     if (!existUser) throw new UnauthorizedException('Such a user not found!');
     const isPasswordValid = await verifyPassword(password, existUser.password);
@@ -47,6 +48,7 @@ export class AuthService {
     return {
       id: existUser.id,
       email: existUser.email,
+      role:existUser.role
     };
   }
 
@@ -56,17 +58,17 @@ export class AuthService {
     return accessToken;
   }
 
-  
   async signIn(id: number, email: string) {
     const accessToken = await this.generateTokensForLogin(id, email);
     return accessToken;
   }
 
-  async validateJwtUser(userId: number) {
+  async validateJwtUser(userId: number): Promise<ValidatedJwtUser> {
     const user = await this.userService.findOneById(userId);
     if (!user) throw new UnauthorizedException('User Not Found!');
     const currentUser = {
       id: user.id,
+      email:user.email,
       role: user.role,
     };
     return currentUser;

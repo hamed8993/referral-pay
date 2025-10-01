@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { CancellInvoiceDto } from './dto/cancell-invoice.dto';
@@ -11,23 +11,23 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 export class InvoiceController {
   constructor(private invoiceService: InvoiceService) {}
 
-  //Todo=>insert user by cookie
+  //Done=>insert user by cookie
   @Post('create')
-  async createInvoice(@Body() body: CreateInvoiceDto): Promise<any> {
-    return await this.invoiceService.createInvoice(body);
+  async createInvoice(@Body() body: CreateInvoiceDto, @Request() req): Promise<any> {
+    return await this.invoiceService.createInvoice(body,req.user);
   }
 
-  //Todo=>insert user by cookie
+  //Done=>insert user by cookie
   @Post('cancell')
-  async cancellInvoice(@Body() body: CancellInvoiceDto): Promise<any> {
-    return await this.invoiceService.cancellInvoice(body);
+  async cancellInvoice(@Body() body: CancellInvoiceDto, @Request() req): Promise<any> {
+    return await this.invoiceService.cancellInvoice(body,req.user);
   }
 
-  //Todo=>insert admin by cookie
+  //Done=>insert admin by cookie
   @Roles(RoleEnum.ADMIN)
   @UseGuards(RoleGuard)
   @Post('admin')
-  async processByAdmin(@Body() body: ProcessInvoiceDto): Promise<any> {
-    return this.invoiceService.processByAdmin(body);
+  async processByAdmin(@Body() body: ProcessInvoiceDto,@Request() req): Promise<any> {
+    return this.invoiceService.processByAdmin(body,req.user);
   }
 }

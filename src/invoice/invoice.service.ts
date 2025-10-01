@@ -21,6 +21,7 @@ import { Wallet } from 'src/wallet/entity/wallet.entity';
 import Decimal from 'decimal.js';
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { EmailProducer } from 'src/queue/producers/email.producer';
+import { ValidatedJwtUser } from 'src/auth/interfaces/payload.interface';
 
 @Injectable()
 export class InvoiceService {
@@ -32,10 +33,10 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
-  async createInvoice(body: ICreateInvoice): Promise<any> {
-    //Todo=>insert user by cookie
+  async createInvoice(body: ICreateInvoice, user:ValidatedJwtUser): Promise<any> {
+    //Done=>insert user by cookie
     const existInvoicerUser =
-      await this.userService.findOneByEmail('neda@gmail.com');
+      await this.userService.findOneByEmail(user.email);
     if (!existInvoicerUser)
       throw new BadRequestException('such a user not found!');
 
@@ -65,10 +66,10 @@ export class InvoiceService {
     return await this.invoiceRepo.save(result);
   }
 
-  async cancellInvoice(body: ICancellInvoice): Promise<any> {
-    //Todo=>insert user by cookie
+  async cancellInvoice(body: ICancellInvoice, user:ValidatedJwtUser): Promise<any> {
+    //Done=>insert user by cookie
     const existInvoicerUser =
-      await this.userService.findOneByEmail('neda@gmail.com');
+      await this.userService.findOneByEmail(user.email);
     if (!existInvoicerUser) throw new BadRequestException('Ooops! Forbidden!');
     const existInvoice = await this.invoiceRepo.findOne({
       where: {
@@ -92,8 +93,8 @@ export class InvoiceService {
     );
   }
 
-  async processByAdmin(body: IProcessInvoice): Promise<any> {
-    //Todo=>insert admin by cookie
+  async processByAdmin(body: IProcessInvoice,admin:ValidatedJwtUser): Promise<any> {
+    //Done=>insert admin by cookie
     const existInvoice = await this.invoiceRepo.findOne({
       where: {
         invoiceNumber: body.invoiceNumber,
@@ -128,7 +129,7 @@ export class InvoiceService {
           existInvoice.status = InvoiceStatus.REJECTED;
           existInvoice.adminNote = body.adminNote;
           existInvoice.processedAt = new Date();
-          existInvoice.processedBy = 3;
+          existInvoice.processedBy = admin.id;
           const result = await this.invoiceRepo.save(existInvoice);
           if (!result) throw new BadRequestException('Update failed!');
 
@@ -142,8 +143,8 @@ export class InvoiceService {
             fee: 0,
             netAmount: existInvoice.totalAmount,
             invoiceNumber: existInvoice.invoiceNumber,
-            //Todo=>insert admin by cookie
-            processedBy: 'ADMIN FROM COOKIE!',
+            //Done=>insert admin by cookie
+            processedBy: admin.email,
             processDescription: existInvoice.adminNote,
             walletId: NaN,
             status: InvoiceStatus.REJECTED,
@@ -167,7 +168,7 @@ export class InvoiceService {
                   status: InvoiceStatus.SUBMITTED,
                   adminNote: body.adminNote,
                   processedAt: new Date(),
-                  processedBy: 3,
+                  processedBy: admin.id,
                 },
               );
               if (resInvoice.affected == 0)
@@ -175,7 +176,7 @@ export class InvoiceService {
 
               //2)TRANSACTION:
               const newTransaction = manager.create(Transaction, {
-                processedBy: 3,
+                processedBy: admin.id,
                 type: existInvoice.type,
                 amount: existInvoice.totalAmount,
                 fee: 0, //===>??????
@@ -231,8 +232,8 @@ export class InvoiceService {
                 fee: newTransaction.fee,
                 netAmount: newTransaction.netAmount,
                 invoiceNumber: existInvoice.invoiceNumber,
-                //Todo=>insert admin by cookie
-                processedBy: 'ADMIN FROM COOKIE!',
+                //Done=>insert admin by cookie
+                processedBy: admin.email,
                 processDescription: existInvoice.adminNote,
                 walletId: newTransaction.wallet.id,
                 status: InvoiceStatus.SUBMITTED,

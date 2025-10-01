@@ -3,6 +3,7 @@ import { Strategy } from 'passport-local';
 import { AuthService } from '../auth.service';
 import { Injectable } from '@nestjs/common';
 import { StrategyNameEnum } from '../enums/auth.enum';
+import { ValidatedLoginReq } from '../interfaces/payload.interface';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(
@@ -13,7 +14,7 @@ export class LocalStrategy extends PassportStrategy(
     super({ usernameField: 'email' });
   }
 
-  async validate(email: string, password: string): Promise<unknown> {
+  async validate(email: string, password: string): Promise<ValidatedLoginReq> {
     return await this.authService.validateLocalUser(email, password);
   }
 }

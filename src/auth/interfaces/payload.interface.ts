@@ -1,3 +1,5 @@
+import { RoleEnum } from 'src/common/enums/role.enum';
+
 export interface AuthJwtPayload {
   sub: number;
   email: string;
@@ -10,7 +12,14 @@ export interface AuthJwtGeneratedPayload {
   exp?: number;
 }
 
-export interface LoginReturnedRequest {
-  email: string;
+export interface ValidatedLoginReq {
   id: number;
+  email: string;
+  role: RoleEnum;
+}
+
+export interface ValidatedJwtUser {
+  id: number;
+  email: string;
+  role: RoleEnum;
 }

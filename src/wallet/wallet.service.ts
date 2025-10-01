@@ -4,6 +4,7 @@ import { Wallet } from './entity/wallet.entity';
 import { Repository } from 'typeorm';
 import { ICreateWallet } from './interface/create-wallet.interface';
 import { UserService } from 'src/user/user.service';
+import { ValidatedJwtUser } from 'src/auth/interfaces/payload.interface';
 
 @Injectable()
 export class WalletService {
@@ -11,8 +12,11 @@ export class WalletService {
     @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
     private userService: UserService,
   ) {}
-  async createWallet(wallet: ICreateWallet): Promise<any> {
-    const userExist = await this.userService.findOneById(wallet.userId);
+  async createWallet(
+    wallet: ICreateWallet,
+    user: ValidatedJwtUser,
+  ): Promise<any> {
+    const userExist = await this.userService.findOneById(user.id);
     if (!userExist) throw new BadRequestException('Such a user not found!');
 
     return await this.walletRepo.save({
