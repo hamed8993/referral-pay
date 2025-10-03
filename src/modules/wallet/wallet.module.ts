@@ -3,7 +3,7 @@ import { WalletService } from './wallet.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Wallet } from './entity/wallet.entity';
 import { WalletController } from './wallet.controller';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from 'src/modules/user/user.module';
 
 @Module({
   controllers: [WalletController],

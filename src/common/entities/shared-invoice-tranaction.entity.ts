@@ -1,7 +1,7 @@
 import { Column, ManyToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { TransactionType } from '../enums/transaction-type.enum';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
+import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
 
 export abstract class SharedInvoiceTranaction extends CommonEntity {
   @Column({ type: 'enum', enum: TransactionType })

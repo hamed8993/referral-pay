@@ -4,9 +4,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { verifyPassword } from 'src/common/helpers/hash-password.helper';
-import { ICreate } from 'src/user/interface/create.interface';
-import { IFullRegister } from 'src/user/interface/full-register.interface';
-import { UserService } from 'src/user/user.service';
+import { ICreate } from 'src/modules/user/interface/create.interface';
+import { IFullRegister } from 'src/modules/user/interface/full-register.interface';
+import { UserService } from 'src/modules/user/user.service';
 import {
   AuthJwtPayload,
   ValidatedLoginReq,
@@ -48,7 +48,7 @@ export class AuthService {
     return {
       id: existUser.id,
       email: existUser.email,
-      role:existUser.role
+      role: existUser.role,
     };
   }
 
@@ -68,7 +68,7 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('User Not Found!');
     const currentUser = {
       id: user.id,
-      email:user.email,
+      email: user.email,
       role: user.role,
     };
     return currentUser;

@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { CreateDto } from 'src/user/dto/create.dto';
-import { FullRegisterDto } from 'src/user/dto/full-register.dto';
+import { CreateDto } from 'src/modules/user/dto/create.dto';
+import { FullRegisterDto } from 'src/modules/user/dto/full-register.dto';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ValidatedLoginReq } from './interfaces/payload.interface';

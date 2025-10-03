@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { EmailProducer } from 'src/queue/producers/email.producer';
-import { TransactionService } from 'src/transaction/transaction.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
 
 @Injectable()
 export class JobService {

@@ -1,6 +1,6 @@
 import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
-import { Transaction } from 'src/transaction/entity/transaction.entity';
-import { User } from 'src/user/entity/user.entity';
+import { Transaction } from 'src/modules/transaction/entity/transaction.entity';
+import { User } from 'src/modules/user/entity/user.entity';
 import {
   BeforeInsert,
   BeforeUpdate,

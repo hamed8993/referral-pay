@@ -11,17 +11,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entity/invoice.entity';
 import { DataSource, Repository } from 'typeorm';
 import { ICreateInvoice } from './interface/create-invoice.interface';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/modules/user/user.service';
 import { ICancellInvoice } from './interface/cancell-invoice.interface';
 import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
 import { IProcessInvoice } from './interface/process-invoice.interface';
-import { Transaction } from 'src/transaction/entity/transaction.entity';
-import { WalletService } from 'src/wallet/wallet.service';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
+import { Transaction } from 'src/modules/transaction/entity/transaction.entity';
+import { WalletService } from 'src/modules/wallet/wallet.service';
+import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
 import Decimal from 'decimal.js';
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { EmailProducer } from 'src/queue/producers/email.producer';
-import { ValidatedJwtUser } from 'src/auth/interfaces/payload.interface';
+import { ValidatedJwtUser } from 'src/modules/auth/interfaces/payload.interface';
 
 @Injectable()
 export class InvoiceService {
@@ -33,10 +33,12 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
-  async createInvoice(body: ICreateInvoice, user:ValidatedJwtUser): Promise<any> {
+  async createInvoice(
+    body: ICreateInvoice,
+    user: ValidatedJwtUser,
+  ): Promise<any> {
     //Done=>insert user by cookie
-    const existInvoicerUser =
-      await this.userService.findOneByEmail(user.email);
+    const existInvoicerUser = await this.userService.findOneByEmail(user.email);
     if (!existInvoicerUser)
       throw new BadRequestException('such a user not found!');
 
@@ -66,10 +68,12 @@ export class InvoiceService {
     return await this.invoiceRepo.save(result);
   }
 
-  async cancellInvoice(body: ICancellInvoice, user:ValidatedJwtUser): Promise<any> {
+  async cancellInvoice(
+    body: ICancellInvoice,
+    user: ValidatedJwtUser,
+  ): Promise<any> {
     //Done=>insert user by cookie
-    const existInvoicerUser =
-      await this.userService.findOneByEmail(user.email);
+    const existInvoicerUser = await this.userService.findOneByEmail(user.email);
     if (!existInvoicerUser) throw new BadRequestException('Ooops! Forbidden!');
     const existInvoice = await this.invoiceRepo.findOne({
       where: {
@@ -93,7 +97,10 @@ export class InvoiceService {
     );
   }
 
-  async processByAdmin(body: IProcessInvoice,admin:ValidatedJwtUser): Promise<any> {
+  async processByAdmin(
+    body: IProcessInvoice,
+    admin: ValidatedJwtUser,
+  ): Promise<any> {
     //Done=>insert admin by cookie
     const existInvoice = await this.invoiceRepo.findOne({
       where: {

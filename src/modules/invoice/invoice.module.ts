@@ -3,8 +3,8 @@ import { InvoiceController } from './invoice.controller';
 import { InvoiceService } from './invoice.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Invoice } from './entity/invoice.entity';
-import { UserModule } from 'src/user/user.module';
-import { WalletModule } from 'src/wallet/wallet.module';
+import { UserModule } from 'src/modules/user/user.module';
+import { WalletModule } from 'src/modules/wallet/wallet.module';
 import { QueueModule } from 'src/queue/queue.module';
 
 @Module({

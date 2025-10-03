@@ -1,7 +1,7 @@
 import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tranaction.entity';
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
-import { Invoice } from 'src/invoice/entity/invoice.entity';
-import { User } from 'src/user/entity/user.entity';
+import { Invoice } from 'src/modules/invoice/entity/invoice.entity';
+import { User } from 'src/modules/user/entity/user.entity';
 import {
   BeforeInsert,
   BeforeUpdate,

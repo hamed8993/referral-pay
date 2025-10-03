@@ -1,7 +1,7 @@
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { WalletStatus } from 'src/common/enums/wallet-status.enum';
-import { Transaction } from 'src/transaction/entity/transaction.entity';
-import { User } from 'src/user/entity/user.entity';
+import { Transaction } from 'src/modules/transaction/entity/transaction.entity';
+import { User } from 'src/modules/user/entity/user.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()

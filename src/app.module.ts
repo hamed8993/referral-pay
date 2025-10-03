@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
+import { UserModule } from './modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { InvoiceModule } from './invoice/invoice.module';
-import { WalletModule } from './wallet/wallet.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { InvoiceModule } from './modules/invoice/invoice.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 import { QueueModule } from './queue/queue.module';
 import { JobModule } from './jobs/job.module';
-import { TransactionModule } from './transaction/transaction.module';
 import { MailModule } from './mailer/mail.module';
 
 @Module({

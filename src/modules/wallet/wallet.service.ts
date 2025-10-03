@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from './entity/wallet.entity';
 import { Repository } from 'typeorm';
 import { ICreateWallet } from './interface/create-wallet.interface';
-import { UserService } from 'src/user/user.service';
-import { ValidatedJwtUser } from 'src/auth/interfaces/payload.interface';
+import { UserService } from '../user/user.service';
+import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
 
 @Injectable()
 export class WalletService {
