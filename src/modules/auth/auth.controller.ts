@@ -1,6 +1,5 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { CreateDto } from 'src/modules/user/dto/create.dto';
-import { FullRegisterDto } from 'src/modules/user/dto/full-register.dto';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ValidatedLoginReq } from './interfaces/payload.interface';
@@ -14,13 +13,7 @@ export class AuthController {
   @Post('signup')
   async signUp(@Body() body: CreateDto): Promise<any> {
     return this.authService.signUp(body);
-  }
-
-  //Done => after passport complete.
-  @Post('fullRegister')
-  async fullRegister(@Body() body: FullRegisterDto): Promise<any> {
-    return this.authService.fullRegister(body);
-  }
+  }  
 
   //Done => after passport
   @Public()

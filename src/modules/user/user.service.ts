@@ -7,6 +7,7 @@ import { IFullRegister } from './interface/full-register.interface';
 import { generateReferral } from 'src/common/helpers/generate-referral.helper';
 import { hashPassword } from 'src/common/helpers/hash-password.helper';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
+import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
 
 @Injectable()
 export class UserService {
@@ -54,11 +55,13 @@ export class UserService {
     }
   }
 
-  async fullRegisterUser(user: IFullRegister): Promise<any> {
+  async fullRegister(body: IFullRegister,user:ValidatedJwtUser): Promise<any> {
+    const userByEmail = await this.findOneByEmail(user.email);
+    if (!userByEmail) throw new BadRequestException('User not found');
     return await this.userRepo.update(
       { email: user.email },
       {
-        fullName: user.firstName + ' ' + user.lastName,
+        fullName: body.firstName + ' ' + body.lastName,
         enrollment: EnrollmentStatus.FULLY,
       },
     );

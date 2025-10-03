@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class FullRegisterDto {
   @IsString()
@@ -6,7 +6,4 @@ export class FullRegisterDto {
 
   @IsString()
   lastName: string;
-
-  @IsEmail()
-  email: string;
 }

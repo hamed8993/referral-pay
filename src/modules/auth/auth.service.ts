@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { verifyPassword } from 'src/common/helpers/hash-password.helper';
 import { ICreate } from 'src/modules/user/interface/create.interface';
-import { IFullRegister } from 'src/modules/user/interface/full-register.interface';
 import { UserService } from 'src/modules/user/user.service';
 import {
   AuthJwtPayload,
@@ -28,13 +27,7 @@ export class AuthService {
     return await this.userService.createUser(body);
   }
 
-  async fullRegister(body: IFullRegister): Promise<any> {
-    const userByEmail = await this.userService.findOneByEmail(body.email);
-    if (!userByEmail) throw new BadRequestException('User not found');
-    return await this.userService.fullRegisterUser(body);
-  }
-
-  async validateLocalUser(
+   async validateLocalUser(
     email: string,
     password: string,
   ): Promise<ValidatedLoginReq> {
