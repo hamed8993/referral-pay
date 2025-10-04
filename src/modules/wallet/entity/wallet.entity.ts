@@ -3,6 +3,7 @@ import { WalletStatus } from 'src/common/enums/wallet-status.enum';
 import { Transaction } from 'src/modules/transaction/entity/transaction.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { WalletCurrencyEnum } from '../enum/wallet-currency.enum';
 
 @Entity()
 export class Wallet extends CommonEntity {
@@ -15,12 +16,15 @@ export class Wallet extends CommonEntity {
   @Column('decimal', { precision: 18, scale: 2, default: 0 })
   balance: number;
 
+  @Column({ type: 'boolean', default: true })
+  is_systemic: boolean;
+
   @ManyToOne(() => User, (user) => user.wallets)
   user: User;
 
   @OneToMany(() => Transaction, (transaction) => transaction.wallet)
   transactions: Transaction[];
 
-  @Column({ default: 'USD' }) //default....?????
-  currency: string;
+  @Column({ enum: WalletCurrencyEnum, type: 'enum' }) //default....?????
+  currency: WalletCurrencyEnum;
 }

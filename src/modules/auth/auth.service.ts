@@ -12,22 +12,42 @@ import {
   ValidatedJwtUser,
 } from './interfaces/payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { DataSource } from 'typeorm';
+import { User } from '../user/entity/user.entity';
+import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private dataSource: DataSource,
+    private walletService: WalletService,
   ) {}
 
   async signUp(body: ICreate): Promise<any> {
     const existUserAllready = await this.userService.findOneByEmail(body.email);
     if (existUserAllready)
       throw new BadRequestException('user allready exist!');
-    return await this.userService.createUser(body);
+
+    const res = await this.dataSource.transaction(async (manager) => {
+      const createdUser = await this.userService.createUserByTransactionManager(
+        body,
+        manager,
+      );
+      const walletsList = await this.walletService.autoCreateSystemWallet(
+        createdUser,
+        manager,
+      );
+
+      return {
+        walletsList,
+      };
+    });
+    return res;
   }
 
-   async validateLocalUser(
+  async validateLocalUser(
     email: string,
     password: string,
   ): Promise<ValidatedLoginReq> {

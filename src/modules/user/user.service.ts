@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { ICreate } from './interface/create.interface';
 import { IFullRegister } from './interface/full-register.interface';
 import { generateReferral } from 'src/common/helpers/generate-referral.helper';
@@ -29,9 +29,9 @@ export class UserService {
     });
   }
 
-  async createUser(user: ICreate): Promise<any> {
+  async _createUserIbternal(user: ICreate, repo: Repository<User>) {
     if (user.referralCode) {
-      const parentUserByRefCode = await this.userRepo.findOne({
+      const parentUserByRefCode = await repo.findOne({
         where: {
           referralCode: user.referralCode,
         },
@@ -40,14 +40,14 @@ export class UserService {
         throw new BadRequestException(
           'such referral code not exist. try again!',
         );
-      return await this.userRepo.save({
+      return await repo.save({
         email: user.email,
         password: await hashPassword(user.password),
         referralCode: generateReferral(user.email),
         parent: parentUserByRefCode,
       });
     } else {
-      return await this.userRepo.save({
+      return await repo.save({
         email: user.email,
         password: await hashPassword(user.password),
         referralCode: generateReferral(user.email),
@@ -55,7 +55,21 @@ export class UserService {
     }
   }
 
-  async fullRegister(body: IFullRegister,user:ValidatedJwtUser): Promise<any> {
+  async createUser(user: ICreate): Promise<any> {
+    return await this._createUserIbternal(user, this.userRepo);
+  }
+
+  async createUserByTransactionManager(
+    user: ICreate,
+    manager: EntityManager,
+  ): Promise<any> {
+    return await this._createUserIbternal(user, manager.getRepository(User));
+  }
+
+  async fullRegister(
+    body: IFullRegister,
+    user: ValidatedJwtUser,
+  ): Promise<any> {
     const userByEmail = await this.findOneByEmail(user.email);
     if (!userByEmail) throw new BadRequestException('User not found');
     return await this.userRepo.update(

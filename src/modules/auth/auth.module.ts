@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RoleGuard } from './guards/role.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { WalletModule } from '../wallet/wallet.module';
 
 @Module({
   controllers: [AuthController],
@@ -26,6 +27,7 @@ import { APP_GUARD } from '@nestjs/core';
   ],
   imports: [
     UserModule,
+    WalletModule,
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.JWT_SECRET,
