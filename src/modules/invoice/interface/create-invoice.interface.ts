@@ -1,7 +1,10 @@
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
+import { WalletTypeEnum } from 'src/modules/wallet/enum/wallet-type.enum';
 
 export interface ICreateInvoice {
   title: string;
+
+  description?: string;
 
   subtotal: number;
 
@@ -11,5 +14,9 @@ export interface ICreateInvoice {
 
   invoiceType: TransactionType;
 
-  walletId: number;
+  walletType?: WalletTypeEnum;
+
+  thirdWalletId?: number;
+
+  walletName?: string;
 }

@@ -10,6 +10,10 @@ import {
   WalletCurrencyEnum,
 } from './enum/wallet-currency.enum';
 import { User } from '../user/entity/user.entity';
+import {
+  getWalletCategoriesArray,
+  WalletCategoryEnum,
+} from './enum/wallet-category.enum';
 
 @Injectable()
 export class WalletService {
@@ -22,18 +26,24 @@ export class WalletService {
     user: User,
     manager: EntityManager,
   ): Promise<any> {
-    const walletsArray: { name: string; currency: WalletCurrencyEnum }[] = [];
-    for (const currencyName of getCurrenciesArray) {
+    const walletsArray: // any[]
+    {
+      name: WalletCategoryEnum;
+      currencies: WalletCurrencyEnum[];
+    }[] = [];
+    for (const catName of getWalletCategoriesArray) {
+      console.log('catName>>>>>', catName);
       const wallet = await manager.getRepository(Wallet).save({
-        currency: currencyName,
         user: user,
-        name: `system-${currencyName}-wallet`,
+        name: catName, //Translate???
         balance: 0,
         is_systemic: true,
+        currencies: getCurrenciesArray,
+        walletCategory: catName,
       });
 
       walletsArray.push({
-        currency: wallet.currency,
+        currencies: wallet.currencies,
         name: wallet.name,
       });
     }

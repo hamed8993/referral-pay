@@ -2,6 +2,7 @@ import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tran
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { Invoice } from 'src/modules/invoice/entity/invoice.entity';
 import { User } from 'src/modules/user/entity/user.entity';
+import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -35,6 +36,12 @@ export class Transaction extends SharedInvoiceTranaction {
 
   @Column({ nullable: true })
   processedBy: number;
+
+  @ManyToOne(() => Wallet, (wallet) => wallet.incomingTrxs, { nullable: true })
+  toWallet: Wallet;
+
+  @ManyToOne(() => Wallet, (wallet) => wallet.outgoingTrxs, { nullable: true })
+  fromWallet: Wallet;
 
   @BeforeInsert()
   @BeforeUpdate()

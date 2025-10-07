@@ -1,15 +1,15 @@
 export enum WalletCurrencyEnum {
   USD = 'USD',
   EUR = 'EUR',
-  // GBP = 'GBP',
-  // JPY = 'JPY',
-  // CHF = 'CHF',
-  // CAD = 'CAD',
-  // AUD = 'AUD',
-  // NZD = 'NZD',
+  GBP = 'GBP',
+  JPY = 'JPY',
+  CHF = 'CHF',
+  CAD = 'CAD',
+  AUD = 'AUD',
+  NZD = 'NZD',
   IRR = 'IRR',
   BTC = 'BTC',
-  // ETH = 'ETH',
+  ETH = 'ETH',
   USDT = 'USDT',
 }
 

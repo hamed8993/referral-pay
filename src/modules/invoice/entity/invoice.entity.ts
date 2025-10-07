@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Decimal } from 'decimal.js';
 import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tranaction.entity';
+import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
 
 @Entity()
 export class Invoice extends SharedInvoiceTranaction {
@@ -22,9 +23,6 @@ export class Invoice extends SharedInvoiceTranaction {
 
   @Column('decimal', { precision: 18, scale: 2, default: 0 })
   discount: number;
-
-  @Column('decimal', { precision: 18, scale: 2 })
-  totalAmount: number;
 
   @Column({
     type: 'enum',
@@ -62,13 +60,29 @@ export class Invoice extends SharedInvoiceTranaction {
   })
   transaction: Transaction;
 
+  @ManyToOne(() => Wallet, (wallet) => wallet.outgoingInvoices, { nullable: true })
+  fromWallet: Wallet;
+
+  @ManyToOne(() => Wallet, (wallet) => wallet.incomingInvoices, { nullable: true })
+  toWallet: Wallet;
+
+  @Column('decimal', { precision: 18, scale: 2 })
+  private _totalAmount: number;
+
+  get totalAmount(): number {
+    return this._totalAmount;
+  }
+
+  private set totalAmount(value: number) {
+    this._totalAmount = value;
+  }
+
   @BeforeInsert()
   @BeforeUpdate()
   calculateTotalAmount() {
     const subtotal = new Decimal(this.subtotal || 0);
     const tax = new Decimal(this.tax || 0);
     const discount = new Decimal(this.discount || 0);
-
     this.totalAmount = subtotal.plus(tax).minus(discount).toNumber();
   }
 
