@@ -3,6 +3,7 @@ import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { UserLevel } from 'src/common/enums/user-level.enum';
 import { UserStatus } from 'src/common/enums/user-status.enum';
+import { DepositAddress } from 'src/modules/deposit-address/entity/deposit-address.entity';
 import { Invoice } from 'src/modules/invoice/entity/invoice.entity';
 import { Transaction } from 'src/modules/transaction/entity/transaction.entity';
 import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
@@ -50,4 +51,10 @@ export class User extends CommonEntity {
 
   @ManyToOne(() => User, (user) => user.children, { nullable: true })
   parent: User;
+
+  // @OneToMany(
+  //   () => DepositAddress,
+  //   (depositAddresses) => depositAddresses.user,{nullable:true}
+  // )
+  // depositAddresses: DepositAddress[];
 }

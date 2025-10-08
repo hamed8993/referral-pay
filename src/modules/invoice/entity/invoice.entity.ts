@@ -12,6 +12,7 @@ import {
 import { Decimal } from 'decimal.js';
 import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tranaction.entity';
 import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
+import { Balance } from 'src/modules/balance/entity/balance.entity';
 
 @Entity()
 export class Invoice extends SharedInvoiceTranaction {
@@ -60,11 +61,25 @@ export class Invoice extends SharedInvoiceTranaction {
   })
   transaction: Transaction;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.outgoingInvoices, { nullable: true })
+  @ManyToOne(() => Wallet, (wallet) => wallet.outgoingInvoices, {
+    nullable: true,
+  })
   fromWallet: Wallet;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.incomingInvoices, { nullable: true })
+  @ManyToOne(() => Wallet, (wallet) => wallet.incomingInvoices, {
+    nullable: true,
+  })
   toWallet: Wallet;
+
+  @ManyToOne(() => Balance, (balance) => balance.outgoingInvoices, {
+    nullable: true,
+  })
+  fromBalance: Balance;
+
+  @ManyToOne(() => Balance, (balance) => balance.incomingInvoices, {
+    nullable: true,
+  })
+  toBalance: Balance;
 
   @Column('decimal', { precision: 18, scale: 2 })
   private _totalAmount: number;
