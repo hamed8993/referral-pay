@@ -1,5 +1,6 @@
 export enum WalletTypeEnum {
   WITHDRAWal = 'withdrawal',
-  DEFAULT = 'default',
-  THIRDPART = 'thirdpart',
+  USD = 'usd',
+  IRR = 'irr',
+  USDT = 'usdt',
 }

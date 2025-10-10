@@ -2,40 +2,24 @@ import { CommonEntity } from 'src/common/entities/common.entity';
 import { WalletStatus } from 'src/common/enums/wallet-status.enum';
 import { Transaction } from 'src/modules/transaction/entity/transaction.entity';
 import { User } from 'src/modules/user/entity/user.entity';
-import {
-  AfterLoad,
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
-import {
-  getCurrenciesArray,
-  WalletCurrencyEnum,
-} from '../enum/wallet-currency.enum';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+
 import { Invoice } from 'src/modules/invoice/entity/invoice.entity';
-import { WalletCategoryEnum } from '../enum/wallet-category.enum';
-import { DepositAddress } from 'src/modules/deposit-address/entity/deposit-address.entity';
-import { Balance } from 'src/modules/balance/entity/balance.entity';
+import { WalletTypeEnum } from '../enum/wallet-type.enum';
 
 @Entity()
 export class Wallet extends CommonEntity {
+  @Column()
+  name: string;
+
   @Column({ type: 'enum', enum: WalletStatus, default: WalletStatus.ACTIVE })
   status: WalletStatus;
 
-  @Column({ type: 'enum', enum: WalletCategoryEnum })
-  name: WalletCategoryEnum;
+  @Column({ type: 'enum' })
+  type: WalletTypeEnum;
 
-  // @Column('decimal', { precision: 18, scale: 2, default: 0 })
-  // balances: number;
-
-  @Column({ type: 'enum', enum: WalletCategoryEnum })
-  walletCategory: WalletCategoryEnum;
-
-  // @Column({ type: 'boolean', default: true })
-  // is_systemic: boolean;
+  @Column()
+  depositAddress: string;
 
   @ManyToOne(() => User, (user) => user.wallets)
   user: User;
@@ -58,7 +42,4 @@ export class Wallet extends CommonEntity {
   //   { nullable: true },
   // )
   // depositAddresses: DepositAddress[];
-
-  @OneToMany(() => Balance, (balance) => balance.wallet)
-  balances: Balance[];
 }

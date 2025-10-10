@@ -23,7 +23,6 @@ import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { EmailProducer } from 'src/queue/producers/email.producer';
 import { ValidatedJwtUser } from 'src/modules/auth/interfaces/payload.interface';
 import { WalletTypeEnum } from '../wallet/enum/wallet-type.enum';
-import { ITransfer } from './interface/transfer.interface';
 
 @Injectable()
 export class InvoiceService {
@@ -35,7 +34,7 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
-  async exchangeCurrency(body: ITransfer, user: ValidatedJwtUser) {
+  async exchangeCurrency(body: any, user: ValidatedJwtUser) {
     const existUser = await await this.userService.findOneByEmail(user.email);
     if (!existUser) throw new BadRequestException('such a user not found!');
     //fromWallet,toWallet,amount
