@@ -1,22 +1,38 @@
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
+import { User } from 'src/modules/user/entity/user.entity';
+import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
 import { WalletTypeEnum } from 'src/modules/wallet/enum/wallet-type.enum';
 
 export interface ICreateInvoice {
+  type: TransactionType;
+
   title: string;
 
-  description?: string;
+  description: string;
 
   subtotal: number;
 
-  paymentGateway: string;
+  tax: number;
 
-  paymentReference: string;
+  discount: number;
 
-  invoiceType: TransactionType;
+  paymentGatewayId: string;
 
-  walletType?: WalletTypeEnum;
+  user: User;
 
-  thirdWalletId?: number;
+  fromWallet?: Wallet;
 
-  walletName?: string;
+  toWallet?: Wallet;
+
+  toBankCartId?: string;
+
+  // amount: number;
+  // type: TransactionType;
+  // description?: string;
+  // gatewayId: string | number;
+  // cryptoDepositNetwork?: string;
+  // depositWalletAdress?: string;
+  // withdrawOriginWalletId?: string;
+  // withdrawDestinationWalletAddress?: string;
+  // bankCartId?: string; //for withdraw of rial wallet to bank account like: topchange
 }

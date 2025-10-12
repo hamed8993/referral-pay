@@ -11,6 +11,9 @@ import { TransactionModule } from './modules/transaction/transaction.module';
 import { QueueModule } from './queue/queue.module';
 import { JobModule } from './jobs/job.module';
 import { MailModule } from './mailer/mail.module';
+import { GatewayModule } from './modules/gateway/gateway.module';
+import { TransferModule } from './modules/transfer/transfer.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { MailModule } from './mailer/mail.module';
     JobModule,
     TransactionModule,
     MailModule,
+    GatewayModule,
+    TransferModule,
+    CartModule
   ],
   controllers: [AppController],
   providers: [AppService],

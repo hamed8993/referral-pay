@@ -16,5 +16,6 @@ import { QueueModule } from 'src/queue/queue.module';
     WalletModule,
     QueueModule,
   ],
+  exports:[InvoiceService]
 })
 export class InvoiceModule {}

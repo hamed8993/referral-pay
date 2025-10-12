@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { TransactionType } from 'src/common/enums/transaction-type.enum';
 
-export class CreateInvoiceDto {
+export class TransferDto {
   @IsNumber()
   amount: number;
 

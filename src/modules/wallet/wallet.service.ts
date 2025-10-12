@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from './entity/wallet.entity';
 import { EntityManager, Repository } from 'typeorm';
@@ -10,10 +14,11 @@ import {
   WalletCurrencyEnum,
 } from './enum/wallet-currency.enum';
 import { User } from '../user/entity/user.entity';
-import {
-  getWalletCategoriesArray,
-  WalletCategoryEnum,
-} from './enum/wallet-category.enum';
+import Decimal from 'decimal.js';
+// import {
+//   getWalletCategoriesArray,
+//   WalletCategoryEnum,
+// } from './enum/wallet-category.enum';
 
 @Injectable()
 export class WalletService {
@@ -28,25 +33,25 @@ export class WalletService {
   ): Promise<any> {
     const walletsArray: // any[]
     {
-      name: WalletCategoryEnum;
+      // name: WalletCategoryEnum;
       currencies: WalletCurrencyEnum[];
     }[] = [];
-    for (const catName of getWalletCategoriesArray) {
-      console.log('catName>>>>>', catName);
-      const wallet = await manager.getRepository(Wallet).save({
-        user: user,
-        name: catName, //Translate???
-        balance: 0,
-        is_systemic: true,
-        currencies: getCurrenciesArray,
-        walletCategory: catName,
-      });
+    // for (const catName of getWalletCategoriesArray) {
+    //   console.log('catName>>>>>', catName);
+    //   const wallet = await manager.getRepository(Wallet).save({
+    //     user: user,
+    //     name: catName, //Translate???
+    //     balance: 0,
+    //     is_systemic: true,
+    //     currencies: getCurrenciesArray,
+    //     walletCategory: catName,
+    //   });
 
-      walletsArray.push({
-        currencies: wallet.currencies,
-        name: wallet.name,
-      });
-    }
+    //   walletsArray.push({
+    //     currencies: wallet.currencies,
+    //     name: wallet.name,
+    //   });
+    // }
     return walletsArray;
   }
 
@@ -67,5 +72,25 @@ export class WalletService {
     return await this.walletRepo.findOne({
       where: { id: walletId },
     });
+  }
+
+  async lockAmountWithManager(
+    manager: EntityManager,
+    walletId: string,
+    amount: number,
+  ): Promise<any> {
+    console.log('>>>>', amount);
+    const wallet = await manager.findOne(Wallet, {
+      where: {
+        id: +walletId,
+      },
+    });
+    if (!wallet)
+      throw new NotFoundException('wallet not found for locking amount!');
+
+    wallet.lockedBalance = new Decimal(wallet.lockedBalance)
+      .plus(amount)
+      .toNumber();
+    return await manager.save(Wallet, wallet);
   }
 }

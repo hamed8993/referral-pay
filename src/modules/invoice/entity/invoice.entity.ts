@@ -35,9 +35,9 @@ export class Invoice extends SharedInvoiceTranaction {
   invoiceNumber: string;
 
   @Column()
-  paymentGateway: string;
+  paymentGatewayId: string;
 
-  @Column()
+  @Column({ nullable: true })
   paymentReference: string;
 
   @Column({ nullable: true })
@@ -82,7 +82,7 @@ export class Invoice extends SharedInvoiceTranaction {
   }
 
   @Column({ nullable: true, default: null })
-  withdrawDoUrl: string;
+  withdrawDocUrl: string;
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -15,11 +15,17 @@ export class Wallet extends CommonEntity {
   @Column({ type: 'enum', enum: WalletStatus, default: WalletStatus.ACTIVE })
   status: WalletStatus;
 
-  @Column({ type: 'enum' })
+  @Column({ type: 'enum', enum: WalletTypeEnum })
   type: WalletTypeEnum;
 
   @Column()
   depositAddress: string;
+
+  @Column('decimal', { precision: 18, scale: 2, default: 0 })
+  balance: number;
+
+  @Column('decimal', { precision: 18, scale: 2, default: 0 })
+  lockedBalance: number;
 
   @ManyToOne(() => User, (user) => user.wallets)
   user: User;

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entity/invoice.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { ICreateInvoice } from './interface/create-invoice.interface';
 import { UserService } from 'src/modules/user/user.service';
 import { ICancellInvoice } from './interface/cancell-invoice.interface';
@@ -33,6 +33,19 @@ export class InvoiceService {
     private walletService: WalletService,
     private emailProducer: EmailProducer,
   ) {}
+
+  async createInvoiceWithManager(
+    manager: EntityManager,
+    body: ICreateInvoice,
+  ): Promise<any> {
+    const invoice = manager.create(Invoice, body);
+    return await manager.save(invoice);
+  }
+
+  async createInvoice(body: ICreateInvoice): Promise<any> {
+    const invoice = this.invoiceRepo.create(body);
+    return await this.invoiceRepo.save(invoice);
+  }
 
   async exchangeCurrency(body: any, user: ValidatedJwtUser) {
     const existUser = await await this.userService.findOneByEmail(user.email);
