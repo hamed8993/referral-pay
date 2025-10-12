@@ -101,6 +101,7 @@ export class InternalGatewayService {
   async withdrawCrypto(body: ITransfer, user: ValidatedJwtUser): Promise<any> {
     //check if withdrawOriginWalletId exist
     //check if withdrawOriginWalletId is for this user
+    //check if amount is not greater than wallet balance.
   }
 
   isAmountGreaterThanUnlockedBalance(args: {

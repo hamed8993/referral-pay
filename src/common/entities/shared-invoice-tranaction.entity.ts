@@ -1,7 +1,6 @@
 import { Column } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { TransactionType } from '../enums/transaction-type.enum';
-import { IsCreditCard } from 'class-validator';
 
 export abstract class SharedInvoiceTranaction extends CommonEntity {
   @Column({ type: 'enum', enum: TransactionType })
@@ -33,7 +32,6 @@ export abstract class SharedInvoiceTranaction extends CommonEntity {
   @Column({ nullable: true })
   toWalletAddress: string;
 
-  @IsCreditCard()
   @Column({ nullable: true })
   toBankCartId: string;
 }
