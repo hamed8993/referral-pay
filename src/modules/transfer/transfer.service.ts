@@ -12,9 +12,7 @@ export class TransferService {
     private gatewayService: GatewayService,
     private internalGatewayService: InternalGatewayService,
   ) {}
-  async dispatcher(
-    body: ITransfer, 
-    user: ValidatedJwtUser): Promise<any> {
+  async dispatcher(body: ITransfer, user: ValidatedJwtUser): Promise<any> {
     const gateway = await this.gatewayService.findOneActiveById(body.gatewayId);
     if (!gateway) throw new BadRequestException('Such a GATEWAY not found!');
 
@@ -35,14 +33,14 @@ export class TransferService {
   async internalGatewayServiceDispatcher(
     body: ITransfer,
     user: ValidatedJwtUser,
-    gatewayId,
+    gatewayId: string,
   ): Promise<any> {
     if (
       body.type === TransactionType.WITHDRAWAL &&
       body.withdrawOriginWalletId &&
       body.withdrawDestinationWalletAddress
     ) {
-      return this.internalGatewayService.withdrawCrypto(body, user);
+      return this.internalGatewayService.withdrawCrypto(body, user, gatewayId);
     }
     if (
       body.type === TransactionType.WITHDRAWAL &&

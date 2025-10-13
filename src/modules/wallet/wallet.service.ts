@@ -56,6 +56,13 @@ export class WalletService {
   }
 
   //Todo=>
+
+  // async createDepositAddresseWallt(
+  //   address: string,
+  //   network: string,
+  //   user,
+  //   amount,
+  // ): Promise<any> {}
   // async createExternalWalletByUserForWithdrawal(wallet:,user: ValidatedJwtUser) {
   //   const userExist = await this.userService.findOneById(user.id);
   //   if (!userExist) throw new BadRequestException('Such a user not found!');
@@ -84,12 +91,18 @@ export class WalletService {
     });
   }
 
+  async findOneByAddress(walletAddress: string): Promise<any> {
+    return await this.walletRepo.findOne({
+      where: { depositAddress: walletAddress },
+      relations: ['user'],
+    });
+  }
+
   async lockAmountWithManager(
     manager: EntityManager,
     walletId: string,
     amount: number,
   ): Promise<any> {
-    console.log('>>>>', amount);
     const wallet = await manager.findOne(Wallet, {
       where: {
         id: +walletId,

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import Decimal from 'decimal.js';
@@ -103,7 +104,13 @@ export class InternalGatewayService {
         payload.amount,
       );
 
-      return invoice;
+      return {
+        currency: 'IRR',
+        invoiceNumber: invoice.invoiceNumber,
+        fromWallet: irrWalletForThisUserId,
+        bankCard,
+        amount: payload.amount,
+      };
     });
   }
 
@@ -130,7 +137,7 @@ export class InternalGatewayService {
 
     if (!depositWalletForThisUserId)
       throw new BadRequestException(
-        'such a wallet not found OR this walley is not belong to you!!',
+        'such a wallet not found OR this wallet is not belong to you!!',
       );
     //create invoice
     const savedInvoice = await this.invoiceService.createInvoice({
@@ -159,25 +166,96 @@ export class InternalGatewayService {
     //Todo: in after, will ad doc of deposit
   }
 
-  async withdrawCrypto(body: ITransfer, user: ValidatedJwtUser): Promise<any> {
+  async withdrawCrypto(
+    body: ITransfer,
+    user: ValidatedJwtUser,
+    gatewayId: string,
+  ): Promise<any> {
     //PAYLOAD=>bankCartId, withdrawOriginWalletId, amount
     const payload: Pick<
       ITransfer,
-      'withdrawOriginWalletId' | 'withdrawDestinationWalletAddress' | 'amount'
+      | 'withdrawOriginWalletId'
+      | 'withdrawDestinationWalletAddress'
+      | 'amount'
+      | 'cryptoDepositNetwork'
     > = {
       withdrawOriginWalletId: body.withdrawOriginWalletId,
       withdrawDestinationWalletAddress: body.withdrawDestinationWalletAddress,
       amount: body.amount,
+      cryptoDepositNetwork: body.cryptoDepositNetwork,
     };
-    //1)check if withdrawOriginWalletId exist AND check if withdrawOriginWalletId is for this user
-    //2)Check if withdrawDestinationWalletAddress is exist
-    // 3)if exist, check if belong to user
-    // 4)if not exist, create that
-    //5)check if amount is not greater than wallet balance.
+    //1)check if withdrawOriginWalletId exist AND check if withdrawOriginWalletId is for this user:
+
+    const withdrawOriginWallet =
+      await this.walletService.findOneByIdForThisUserId(
+        +(payload.withdrawOriginWalletId as string),
+        user.id,
+      );
+    if (!withdrawOriginWallet)
+      throw new NotAcceptableException(
+        'such a wallet not found OR this wallet is not belong to you!!',
+      );
+
+    //2)check if amount is not greater than wallet balance.
+    if (
+      this.isAmountGreaterThanUnlockedBalance({
+        invoiceAmount: payload.amount,
+        walletLockedBalance: withdrawOriginWallet.lockedBalance,
+        walletBalance: withdrawOriginWallet.balance,
+      })
+    )
+      throw new BadRequestException(
+        'The demanded amount is greater than wallet balance...',
+      );
+
+    //3)Check: withdrawDestinationWalletAddress is exist but not belong to this user:
+    const withdrawDestinationWallet = await this.walletService.findOneByAddress(
+      payload.withdrawDestinationWalletAddress as string,
+    );
+    if (
+      withdrawDestinationWallet &&
+      user.id !== withdrawDestinationWallet.user.id
+    )
+      if (user.id !== withdrawDestinationWallet.user.id)
+        throw new BadRequestException('This wallet is not belong to you!');
+
     //Todo=>Email code send......
     //6):
-    //6-1)create invoice
+    //6-1)create invoice:
     //6-2)write locked amount in wallet
+    return await this.dataSource.transaction(async (manager) => {
+      const invoice = await this.invoiceService.createInvoiceWithManager(
+        manager,
+        {
+          paymentGatewayId: gatewayId,
+          type: TransactionType.WITHDRAWAL,
+          title: 'localized-title???',
+          description: 'localized-desc',
+          subtotal: payload.amount,
+          tax: 0, //??
+          discount: 0, //?
+          user: withdrawOriginWallet.user,
+          fromWallet: withdrawOriginWallet as Wallet,
+          cryptoNetwork: payload.cryptoDepositNetwork,
+          toWalletAddress: payload.withdrawDestinationWalletAddress,
+        },
+      );
+
+      await this.walletService.lockAmountWithManager(
+        manager,
+        withdrawOriginWallet.id,
+        payload.amount,
+      );
+
+      return {
+        currency: withdrawOriginWallet.type, //UDS,USDT,IRR...
+        invoiceNumber: invoice.invoiceNumber,
+        fromWallet: withdrawOriginWallet,
+        address: payload.withdrawDestinationWalletAddress,
+        network: payload.cryptoDepositNetwork,
+        amount: payload.amount,
+      };
+    });
   }
 
   isAmountGreaterThanUnlockedBalance(args: {
