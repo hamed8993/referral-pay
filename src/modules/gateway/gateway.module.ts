@@ -8,6 +8,9 @@ import { InternalGatewayService } from './strategies/internal.service';
 import { CartModule } from '../cart/cart.module';
 import { InvoiceModule } from '../invoice/invoice.module';
 import { WalletModule } from '../wallet/wallet.module';
+import { DepositCryptoService } from './strategies/internal/deposit-crypto.service';
+import { WithdrawCryptoService } from './strategies/internal/withdraw-crypto.service';
+import { WithdrawBankCart } from './strategies/internal/withdraw-bank-cart.service';
 
 @Module({
   imports: [
@@ -15,10 +18,22 @@ import { WalletModule } from '../wallet/wallet.module';
     HttpModule,
     CartModule,
     InvoiceModule,
-    WalletModule
+    WalletModule,
   ],
   controllers: [GatewayController],
-  providers: [GatewayService, InternalGatewayService],
-  exports: [GatewayService, InternalGatewayService],
+  providers: [
+    GatewayService,
+    InternalGatewayService,
+    DepositCryptoService,
+    WithdrawBankCart,
+    WithdrawCryptoService,
+  ],
+  exports: [
+    GatewayService,
+    InternalGatewayService,
+    DepositCryptoService,
+    WithdrawBankCart,
+    WithdrawCryptoService,
+  ],
 })
 export class GatewayModule {}

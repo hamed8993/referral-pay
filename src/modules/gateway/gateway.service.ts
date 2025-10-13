@@ -12,14 +12,14 @@ import { firstValueFrom } from 'rxjs';
 import { Request } from 'express';
 import { returnEnvName } from 'src/common/helpers/return-env-name.helper';
 
-let myAuthority = '';
-
 @Injectable()
 export class GatewayService {
   constructor(
     @InjectRepository(Gateway) private gatewayRepo: Repository<Gateway>,
     private readonly httpService: HttpService,
   ) {}
+
+  private myAuthority = '';
 
   async createGateway(body: IcreateGateway): Promise<any> {
     return await this.gatewayRepo.save({
@@ -80,9 +80,9 @@ export class GatewayService {
         ),
       );
 
-      myAuthority = resCanUserGoToPayment.data.data.authority;
+      this.myAuthority = resCanUserGoToPayment.data.data.authority;
 
-      return `${existGateway?.endpoints[returnEnvName()].paymentUrl}/${myAuthority}`;
+      return `${existGateway?.endpoints[returnEnvName()].paymentUrl}/${this.myAuthority}`;
     } catch (error) {
       throw new PreconditionFailedException(
         `ZARINPAL gives error for accepting payment>>${error}`,
@@ -91,9 +91,6 @@ export class GatewayService {
   }
 
   async checkPayment(req: Request): Promise<any> {
-    console.log('req.url>>>', req.url, req.query);
-    console.log('req.query>>>', req.query);
-
     try {
       if (req.query.Status === 'OK') {
         const gateWayId = 1;
@@ -103,7 +100,6 @@ export class GatewayService {
         });
         if (!existGateway)
           throw new BadGatewayException('such a gateway not found!');
-        console.log('myAuthority>>>', myAuthority);
         const resIsPaymentProccessedSucces = await firstValueFrom(
           this.httpService.post(
             `${existGateway?.endpoints[returnEnvName()].verifyUrl}`,
@@ -111,14 +107,10 @@ export class GatewayService {
               merchant_id: existGateway.credentials.merchantId,
               amount: '11500',
               //   authority: resCanUserGoToPayment.data.data.authority,
-              authority: myAuthority,
+              authority: this.myAuthority,
               //   currency: 'IRR',
             },
           ),
-        );
-        console.log(
-          'resIsPaymentProccessedSucces>>>>',
-          resIsPaymentProccessedSucces,
         );
 
         const {

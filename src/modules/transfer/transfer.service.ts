@@ -4,13 +4,19 @@ import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { GatewayService } from '../gateway/gateway.service';
 import { GatewayType } from 'src/common/enums/gateway-type.enum';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
-import { InternalGatewayService } from '../gateway/strategies/internal.service';
+// import { InternalGatewayService } from '../gateway/strategies/internal.service';
+import { DepositCryptoService } from '../gateway/strategies/internal/deposit-crypto.service';
+import { WithdrawCryptoService } from '../gateway/strategies/internal/withdraw-crypto.service';
+import { WithdrawBankCart } from '../gateway/strategies/internal/withdraw-bank-cart.service';
 
 @Injectable()
 export class TransferService {
   constructor(
     private gatewayService: GatewayService,
-    private internalGatewayService: InternalGatewayService,
+    // private internalGatewayService: InternalGatewayService,
+    private depositCryptoService: DepositCryptoService,
+    private withdrawCryptoService: WithdrawCryptoService,
+    private withdrawBankCart: WithdrawBankCart,
   ) {}
   async dispatcher(body: ITransfer, user: ValidatedJwtUser): Promise<any> {
     const gateway = await this.gatewayService.findOneActiveById(body.gatewayId);
@@ -40,14 +46,14 @@ export class TransferService {
       body.withdrawOriginWalletId &&
       body.withdrawDestinationWalletAddress
     ) {
-      return this.internalGatewayService.withdrawCrypto(body, user, gatewayId);
+      return this.withdrawCryptoService.withdrawCrypto(body, user, gatewayId);
     }
     if (
       body.type === TransactionType.WITHDRAWAL &&
       body.bankCartId &&
       body.withdrawOriginWalletId
     ) {
-      return await this.internalGatewayService.withdrawToBankCart(
+      return await this.withdrawBankCart.withdrawToBankCart(
         body,
         user,
         gatewayId,
@@ -58,7 +64,7 @@ export class TransferService {
       body.cryptoDepositWalletId &&
       body.cryptoDepositNetwork
     ) {
-      return await this.internalGatewayService.depostCryptoWallet(
+      return await this.depositCryptoService.depostCryptoWallet(
         body,
         user,
         gatewayId,
