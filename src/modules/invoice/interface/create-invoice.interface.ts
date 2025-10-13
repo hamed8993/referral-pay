@@ -26,6 +26,7 @@ export interface ICreateInvoice {
 
   toBankCartId?: string;
 
+  cryptoNetwork?: string;
   // amount: number;
   // type: TransactionType;
   // description?: string;

@@ -12,7 +12,9 @@ export class TransferService {
     private gatewayService: GatewayService,
     private internalGatewayService: InternalGatewayService,
   ) {}
-  async dispatcher(body: ITransfer, user: ValidatedJwtUser): Promise<any> {
+  async dispatcher(
+    body: ITransfer, 
+    user: ValidatedJwtUser): Promise<any> {
     const gateway = await this.gatewayService.findOneActiveById(body.gatewayId);
     if (!gateway) throw new BadRequestException('Such a GATEWAY not found!');
 
@@ -58,7 +60,11 @@ export class TransferService {
       body.cryptoDepositWalletId &&
       body.cryptoDepositNetwork
     ) {
-      return await this.internalGatewayService.depostCryptoWallet(body, user);
+      return await this.internalGatewayService.depostCryptoWallet(
+        body,
+        user,
+        gatewayId,
+      );
     }
     throw new BadRequestException('Bad gateway request! internal method');
   }

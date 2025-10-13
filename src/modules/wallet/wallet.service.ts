@@ -74,6 +74,16 @@ export class WalletService {
     });
   }
 
+  async findOneByIdForThisUserId(
+    walletId: number,
+    userId: number,
+  ): Promise<any> {
+    return await this.walletRepo.findOne({
+      where: { id: walletId, user: { id: userId } },
+      relations: ['user'],
+    });
+  }
+
   async lockAmountWithManager(
     manager: EntityManager,
     walletId: string,

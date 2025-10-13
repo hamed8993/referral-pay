@@ -10,7 +10,10 @@ export abstract class SharedInvoiceTranaction extends CommonEntity {
   title: string;
 
   @Column({ nullable: true })
-  description: string;
+  description?: string;
+
+  @Column({ nullable: true })
+  cryptoNetwork?: string;
 
   // @Column({
   //   type: 'enum',
@@ -27,11 +30,11 @@ export abstract class SharedInvoiceTranaction extends CommonEntity {
   // toCurrency: WalletCurrencyEnum;
 
   @Column({ nullable: true })
-  fromWalletAddress: string;
+  fromWalletAddress?: string;
 
   @Column({ nullable: true })
-  toWalletAddress: string;
+  toWalletAddress?: string;
 
   @Column({ nullable: true })
-  toBankCartId: string;
+  toBankCartId?: string;
 }

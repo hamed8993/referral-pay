@@ -21,7 +21,7 @@ export class TransferDto {
 
   @IsOptional()
   @IsString()
-  depositWalletAdress?: string;
+  cryptoDepositWalletId?: string;
 
   @IsOptional()
   @IsString()
