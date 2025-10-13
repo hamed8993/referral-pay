@@ -14,6 +14,7 @@ import { MailModule } from './mailer/mail.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { CartModule } from './modules/cart/cart.module';
+import { OtpModule } from './modules/otp/otp.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { CartModule } from './modules/cart/cart.module';
     MailModule,
     GatewayModule,
     TransferModule,
-    CartModule
+    CartModule,
+    OtpModule,
   ],
   controllers: [AppController],
   providers: [AppService],
