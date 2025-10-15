@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   PreconditionFailedException,
 } from '@nestjs/common';
@@ -109,7 +110,11 @@ export class ZarrinpalService implements IGatewayCallback {
   ): Promise<PaymentVerifyResponse> {
     const verificationRes: IZarrinpalValidated =
       await this.zCheckPayment(payload);
-    if (verificationRes.code == 100 || verificationRes.code == 101) {
+    if (verificationRes.code == 101)
+      throw new BadRequestException(
+        'This Transaction done/validated already successfully!',
+      );
+    if (verificationRes.code == 100) {
       //?????? for 101
       return {
         success: true,
