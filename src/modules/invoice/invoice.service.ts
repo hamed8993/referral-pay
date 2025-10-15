@@ -34,6 +34,14 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
+  async findOneByInvoiceAuthority(authority: string): Promise<any> {
+    return await this.invoiceRepo.findOne({
+      where: {
+        paymentGatewayAuthority: authority,
+      },
+    });
+  }
+
   async createInvoiceWithManager(
     manager: EntityManager,
     body: ICreateInvoice,
@@ -117,7 +125,23 @@ export class InvoiceService {
   //   return await this.invoiceRepo.save(result);
   // }
 
-  async cancellInvoice(
+  async submitPaymentInvoiceByAuthorityByManager(
+    manager: EntityManager,
+    authority: string,
+    relations: ('user' | 'transaction' | 'fromWallet' | 'toWallet')[],
+  ): Promise<any> {
+    const invoice = await manager.findOne(Invoice, {
+      where: {
+        paymentGatewayAuthority: authority,
+      },
+      relations,
+    });
+    if (!invoice) throw new NotFoundException('such a invoice not found!');
+    invoice.status = InvoiceStatus.SUBMITTED;
+    return await manager.save(Invoice, invoice);
+  }
+
+  async cancellInvoiceByUser(
     body: ICancellInvoice,
     user: ValidatedJwtUser,
   ): Promise<any> {
@@ -135,15 +159,23 @@ export class InvoiceService {
       },
     });
     if (!existInvoice) throw new NotFoundException('Such a invoice not exist!');
-    return await this.invoiceRepo.update(
-      {
-        invoiceNumber: body.invoiceNumber,
-      },
-      {
-        status: InvoiceStatus.CANCELLED,
-        userCancellDescription: body.userCancellDescription,
-      },
-    );
+    ((existInvoice.status = InvoiceStatus.CANCELLED),
+      (existInvoice.userCancellDescription = body.userCancellDescription));
+    return await this.invoiceRepo.save(existInvoice);
+  }
+
+  async cancellPaymentInvoiceByAuthorityOrError(
+    authority: string,
+  ): Promise<any> {
+    const invoice = await this.invoiceRepo.findOne({
+      where: { paymentGatewayAuthority: authority },
+    });
+    if (!invoice)
+      throw new NotFoundException(
+        'such a invoice by that <authority> not found!',
+      );
+    invoice.status = InvoiceStatus.CANCELLED;
+    return await this.invoiceRepo.save(invoice);
   }
 
   async processByAdmin(

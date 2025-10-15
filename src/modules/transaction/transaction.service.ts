@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entity/transaction.entity';
-import { Between, IsNull, Not, Repository } from 'typeorm';
+import { Between, EntityManager, IsNull, Not, Repository } from 'typeorm';
 import { IDailyTranactionsReportItem } from 'src/common/interface/transaction-report.interface';
+import { ICreateTransaction } from './interface/create-transaction.interface';
 
 @Injectable()
 export class TransactionService {
@@ -10,6 +11,13 @@ export class TransactionService {
     @InjectRepository(Transaction)
     private transactionRepo: Repository<Transaction>,
   ) {}
+
+  async createTransactionByManager(
+    manager: EntityManager,
+    body: ICreateTransaction,
+  ): Promise<any> {
+    return await manager.save(Transaction, body);
+  }
 
   async getAllLastOneDayRecords(): Promise<any> {
     const now = new Date();

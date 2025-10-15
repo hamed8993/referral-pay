@@ -15,6 +15,7 @@ import {
 } from './enum/wallet-currency.enum';
 import { User } from '../user/entity/user.entity';
 import Decimal from 'decimal.js';
+import { WalletTypeEnum } from './enum/wallet-type.enum';
 // import {
 //   getWalletCategoriesArray,
 //   WalletCategoryEnum,
@@ -91,6 +92,16 @@ export class WalletService {
     });
   }
 
+  async findOneByTypeForThisUserId(
+    walletType: WalletTypeEnum,
+    userId: number,
+  ): Promise<any> {
+    return await this.walletRepo.findOne({
+      where: { type: walletType, user: { id: userId } },
+      relations: ['user'],
+    });
+  }
+
   async findOneByAddress(walletAddress: string): Promise<any> {
     return await this.walletRepo.findOne({
       where: { depositAddress: walletAddress },
@@ -114,6 +125,31 @@ export class WalletService {
     wallet.lockedBalance = new Decimal(wallet.lockedBalance)
       .plus(amount)
       .toNumber();
+    return await manager.save(Wallet, wallet);
+  }
+
+  async depositWalletByUserByManagerByError(
+    manager: EntityManager,
+    body: { userId: string; walletType: WalletTypeEnum; amount: number },
+    relations:
+      ( 'user'
+      | 'outgoingTrxs'
+      | 'incomingTrxs'
+      | 'incomingInvoices'
+      | 'outgoingInvoices')[],
+  ): Promise<any> {
+    const wallet = await manager.findOne(Wallet, {
+      where: {
+        user: { id: +(body.userId as string) },
+        type: body.walletType,
+      },
+      relations,
+    });
+
+    if (!wallet) throw new NotFoundException('such a wallet not found!');
+
+    wallet.balance = new Decimal(wallet.balance).plus(body.amount).toNumber();
+
     return await manager.save(Wallet, wallet);
   }
 }

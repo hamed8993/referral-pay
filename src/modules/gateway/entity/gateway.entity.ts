@@ -2,6 +2,7 @@ import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Cart } from '../../cart/entity/cart.entity';
 import { GatewayType } from 'src/common/enums/gateway-type.enum';
+import { GatewayProviderEnum } from 'src/common/enums/gateway-provider.enum';
 
 @Entity()
 export class Gateway extends CommonEntity {
@@ -13,6 +14,12 @@ export class Gateway extends CommonEntity {
 
   @Column()
   handler: string;
+
+  @Column(
+    { type: 'enum', 
+      enum: GatewayProviderEnum, 
+      nullable: true })
+  provider: GatewayProviderEnum;
 
   @Column({ default: true })
   isActive: boolean;

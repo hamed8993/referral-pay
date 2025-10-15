@@ -38,6 +38,9 @@ export class Invoice extends SharedInvoiceTranaction {
   paymentGatewayId: string;
 
   @Column({ nullable: true })
+  paymentGatewayAuthority: string;
+
+  @Column({ nullable: true })
   paymentReference: string;
 
   @Column({ nullable: true })

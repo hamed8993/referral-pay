@@ -18,6 +18,8 @@ export interface ICreateInvoice {
 
   paymentGatewayId: string;
 
+  paymentGatewayAuthority?: string;
+
   user: User;
 
   fromWallet?: Wallet;

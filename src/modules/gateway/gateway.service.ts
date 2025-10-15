@@ -1,26 +1,31 @@
-import {
-  BadGatewayException,
-  Injectable,
-  PreconditionFailedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Gateway } from './entity/gateway.entity';
 import { IcreateGateway } from './interface/create-gateway.interface';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import { Request } from 'express';
-import { returnEnvName } from 'src/common/helpers/return-env-name.helper';
+import { InvoiceService } from '../invoice/invoice.service';
+import { WalletService } from '../wallet/wallet.service';
+import { WalletTypeEnum } from '../wallet/enum/wallet-type.enum';
+import { TransactionService } from '../transaction/transaction.service';
+import { TransactionType } from 'src/common/enums/transaction-type.enum';
+import {
+  PaymentCallbackResponse,
+  PaymentVerifyResponse,
+} from './interface/gateway.interface';
+import { GatewayProviderEnum } from 'src/common/enums/gateway-provider.enum';
+import { PaymentGatewayFactory } from './factory/payment-gateway.factory';
 
 @Injectable()
 export class GatewayService {
   constructor(
     @InjectRepository(Gateway) private gatewayRepo: Repository<Gateway>,
-    private readonly httpService: HttpService,
+    private invoiceService: InvoiceService,
+    private dataSource: DataSource,
+    private walletService: WalletService,
+    private transactionService: TransactionService,
+    private paymentGatewayFactory: PaymentGatewayFactory,
   ) {}
-
-  private myAuthority = '';
-
   async createGateway(body: IcreateGateway): Promise<any> {
     return await this.gatewayRepo.save({
       name: body.name,
@@ -55,104 +60,92 @@ export class GatewayService {
     });
   }
 
-  async bankPayment(): Promise<any> {
-    const gateWayId = 1;
-    const existGateway = await this.gatewayRepo.findOne({
-      where: { id: gateWayId },
+  async paymentCallback(req: Request): Promise<any> {
+    // console.log('req.url>>', req.url);
+    // req.url>> /gateway/callback?Authority=S00000000000000000000000000000087zy8&Status=OK
+    // req.url>> /gateway/callback?Authority=S000000000000000000000000000000plrvg&Status=NOK
+
+    const invoice = await this.invoiceService.findOneByInvoiceAuthority(
+      req.query.Authority as string,
+    );
+
+    const gateway = await this.gatewayRepo.findOne({
+      where: {
+        id: invoice.paymentGatewayId,
+      },
     });
-
-    if (!existGateway)
-      throw new BadGatewayException('such a gateway not found!');
-    //invoice by pending-status be created or create.
-
-    try {
-      const resCanUserGoToPayment = await firstValueFrom(
-        this.httpService.post(
-          existGateway?.endpoints[returnEnvName()].requestUrl,
-          {
-            merchant_id: existGateway?.credentials.merchantId,
-            callback_url: existGateway?.endpoints[returnEnvName()].callbackUrl,
-            amount: '11500',
-            description: 'bla blas',
-            currency: 'IRR',
-            order_id: '11', //invoiceNumber
-          },
-        ),
+    if (!gateway)
+      throw new NotFoundException(
+        'Could not find any Gateway for this Invoice!',
       );
 
-      this.myAuthority = resCanUserGoToPayment.data.data.authority;
+    const gatewayService = this.paymentGatewayFactory.getGateway(
+      gateway.provider,
+    );
+    const callbackRes: PaymentCallbackResponse =
+      await gatewayService.extractCallbackData(req);
 
-      return `${existGateway?.endpoints[returnEnvName()].paymentUrl}/${this.myAuthority}`;
-    } catch (error) {
-      throw new PreconditionFailedException(
-        `ZARINPAL gives error for accepting payment>>${error}`,
-      );
-    }
-  }
-
-  async checkPayment(req: Request): Promise<any> {
-    try {
-      if (req.query.Status === 'OK') {
-        const gateWayId = 1;
-
-        const existGateway = await this.gatewayRepo.findOne({
-          where: { id: gateWayId },
+    if (callbackRes.status === 'OK') {
+      const verificationRes: PaymentVerifyResponse =
+        await gatewayService.verifyPayment({
+          invoiceTotalAmount: invoice.totalAmount,
+          invoicePaymentAuthority: invoice.paymentGatewayAuthority,
         });
-        if (!existGateway)
-          throw new BadGatewayException('such a gateway not found!');
-        const resIsPaymentProccessedSucces = await firstValueFrom(
-          this.httpService.post(
-            `${existGateway?.endpoints[returnEnvName()].verifyUrl}`,
-            {
-              merchant_id: existGateway.credentials.merchantId,
-              amount: '11500',
-              //   authority: resCanUserGoToPayment.data.data.authority,
-              authority: this.myAuthority,
-              //   currency: 'IRR',
-            },
-          ),
-        );
 
-        const {
-          wages,
-          message,
-          code,
-          ref_id,
-          card_pan,
-          card_hash,
-          fee_type,
-          shaparak_fee,
-          fee,
-          order_id,
-        } = resIsPaymentProccessedSucces.data.data;
-
-        if (code === 100 || code === 101) {
-          console.log('wages>>>>', wages);
-          console.log('message>>>>', message);
-
-          console.log('code>>>>', code);
-          console.log('ref_id>>>>', ref_id);
-          console.log('card_pan>>>>', card_pan);
-          console.log('card_hash>>>>', card_hash);
-          console.log('fee_type>>>>', fee_type);
-          console.log('shaparak_fee>>>>', shaparak_fee);
-
-          console.log('fee>>>>', fee);
-          console.log('order_id>>>>', order_id);
-
-          // complete INVOICE AND
-          // redirect by RESPONSE that is success...
-          return { ref_id, card_pan, card_hash, fee_type, fee };
-        } else {
-          ('error');
-        }
+      // if (verificationRes.code == 100 || verificationRes.code == 101) {
+      if (verificationRes.success) {
+        return this.dataSource.transaction(async (manager) => {
+          //1)update invoice by <req.query.Authority> to submitted
+          const submittedInvoice =
+            await this.invoiceService.submitPaymentInvoiceByAuthorityByManager(
+              manager,
+              req.query.Authority as string,
+              ['user'],
+            );
+          //2)update wallet
+          const updatedWallet =
+            await this.walletService.depositWalletByUserByManagerByError(
+              manager,
+              {
+                userId: submittedInvoice.user.id,
+                walletType: WalletTypeEnum.IRR,
+                amount: submittedInvoice.totalAmount,
+              },
+              ['user'],
+            );
+          // 3)create transaction
+          const newTransaction =
+            await this.transactionService.createTransactionByManager(manager, {
+              amount: submittedInvoice.totalAmount,
+              title: submittedInvoice.title || 'def title', //????????
+              type: TransactionType.DEPOSIT,
+              transactionTracingCode: verificationRes.referenceId as string,
+              toWallet: updatedWallet,
+              invoice: submittedInvoice,
+              user: updatedWallet.user,
+            });
+          return {
+            id: newTransaction.id,
+            created_at: newTransaction.created_at,
+            tracingCode: newTransaction.transactionTracingCode,
+            invoiceId: newTransaction.invoiceId,
+          };
+        });
+        //return where????
       } else {
-        //redirect fault
+        //update invoice by <req.query.Authority> to cancelled
+        await this.invoiceService.cancellPaymentInvoiceByAuthorityOrError(
+          req.query.Authority as string,
+        );
       }
-    } catch (error) {
-      throw new PreconditionFailedException(
-        `ZARINPAL gives error in verification the payment>>${error}`,
-      );
+    } else {
+      //update invoice by <req.query.Authority> to cancelled
+      const cancelledInvoice =
+        await this.invoiceService.cancellPaymentInvoiceByAuthorityOrError(
+          req.query.Authority as string,
+        );
+      //return where????
+      return cancelledInvoice;
     }
   }
 }

@@ -25,11 +25,11 @@ export class Transaction extends SharedInvoiceTranaction {
   @Column('decimal', { precision: 18, scale: 2 })
   amount: number;
 
-  @Column('decimal', { precision: 18, scale: 2 })
-  fee: number;
+  // @Column('decimal', { precision: 18, scale: 2 })
+  // fee: number;
 
-  @Column('decimal', { precision: 18, scale: 2 })
-  netAmount: number;
+  // @Column('decimal', { precision: 18, scale: 2 })
+  // netAmount: number;
 
   @Column({ nullable: true })
   transactionTracingCode: string;
@@ -43,13 +43,13 @@ export class Transaction extends SharedInvoiceTranaction {
   @ManyToOne(() => Wallet, (wallet) => wallet.outgoingTrxs, { nullable: true })
   fromWallet: Wallet;
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  calculateNetAmount() {
-    if (this.type === TransactionType.DEPOSIT) {
-      this.netAmount = this.amount;
-    } else if (this.type === TransactionType.WITHDRAWAL) {
-      this.netAmount = this.amount - this.fee;
-    }
-  }
+  // @BeforeInsert()
+  // @BeforeUpdate()
+  // calculateNetAmount() {
+  //   if (this.type === TransactionType.DEPOSIT) {
+  //     this.netAmount = this.amount;
+  //   } else if (this.type === TransactionType.WITHDRAWAL) {
+  //     this.netAmount = this.amount - this.fee;
+  //   }
+  // }
 }

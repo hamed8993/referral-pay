@@ -72,7 +72,7 @@ export class InvoiceController {
     @Request() req,
   ): Promise<any> {
     const user: ValidatedJwtUser = req.user;
-    return await this.invoiceService.cancellInvoice(body, user);
+    return await this.invoiceService.cancellInvoiceByUser(body, user);
   }
 
   //Done=>insert admin by cookie

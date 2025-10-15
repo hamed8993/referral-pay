@@ -26,16 +26,22 @@ export class GatewayController {
     return await this.gatewayService.createGateway(body);
   }
 
-  @Post('payment')
-  async bankPayment(@Res() res: Response) {
-    const authorityUrl = await this.gatewayService.bankPayment();
-    return res.redirect(authorityUrl);
-  }
+  // @Post('payment')
+  // async bankPayment(@Res() res: Response) {
+  //   const authorityUrl = await this.gatewayService.bankPayment();
+  //   return res.redirect(authorityUrl);
+  // }
 
   @Public()
   @Get('callback')
   async callback(@Req() req: Request) {
-    return await this.gatewayService.checkPayment(req);
-    // console.log('5555555>>', req.url);
+    return await this.gatewayService.paymentCallback(req);
   }
+
+  // @Public()
+  // @Get('callback/paypal')
+  // async pCallback(@Req() req: Request) {
+  //   return await this.gatewayService.checkPayment(req);
+  //   // console.log('5555555>>', req.url);
+  // }
 }
