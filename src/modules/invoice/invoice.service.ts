@@ -34,6 +34,35 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
+  async updateByInvoiceNumberForUserByError(body: {
+    userId: string;
+    invoiceNumber: string;
+    updatePayload: Partial<
+      Pick<
+        Invoice,
+        | 'status'
+        | 'processedAt'
+        | 'processedBy'
+        | 'adminNote'
+        | 'userCancellDescription'
+        | 'transaction'
+        | 'depositDocUrl'
+      >
+    >;
+  }): Promise<any> {
+    const invoice = await this.invoiceRepo.findOne({
+      where: {
+        invoiceNumber: body.invoiceNumber as string,
+        user: { id: +(body.userId as string) },
+      },
+    });
+    if (!invoice)
+      throw new BadRequestException(
+        'any invoice not found OR this invoice is not for you!',
+      );
+    return await this.invoiceRepo.save({ ...invoice, ...body });
+  }
+
   async findOneByInvoiceAuthority(authority: string): Promise<any> {
     return await this.invoiceRepo.findOne({
       where: {
@@ -53,13 +82,6 @@ export class InvoiceService {
   async createInvoice(body: ICreateInvoice): Promise<any> {
     const invoice = this.invoiceRepo.create(body);
     return await this.invoiceRepo.save(invoice);
-  }
-
-  async exchangeCurrency(body: any, user: ValidatedJwtUser) {
-    const existUser = await await this.userService.findOneByEmail(user.email);
-    if (!existUser) throw new BadRequestException('such a user not found!');
-    //fromWallet,toWallet,amount
-    //invoiceRepo
   }
 
   // async createInvoice(

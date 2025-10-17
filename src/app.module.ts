@@ -15,10 +15,13 @@ import { GatewayModule } from './modules/gateway/gateway.module';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OtpModule } from './modules/otp/otp.module';
+import { TicketModule } from './modules/ticket/ticket.module';
+import { UploadModule } from './modules/multer/multer.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    // { isGlobal: true } => for: globally accessablity to <ConfigSerice>
     DatabaseModule,
     UserModule,
     AuthModule,
@@ -32,6 +35,8 @@ import { OtpModule } from './modules/otp/otp.module';
     TransferModule,
     CartModule,
     OtpModule,
+    TicketModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

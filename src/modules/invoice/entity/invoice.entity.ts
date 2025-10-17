@@ -41,7 +41,7 @@ export class Invoice extends SharedInvoiceTranaction {
   paymentGatewayAuthority: string;
 
   @Column({ nullable: true })
-  paymentReference: string;
+  paymentReference: string;//?????
 
   @Column({ nullable: true })
   userCancellDescription: string;
@@ -85,7 +85,7 @@ export class Invoice extends SharedInvoiceTranaction {
   }
 
   @Column({ nullable: true, default: null })
-  withdrawDocUrl: string;
+  depositDocUrl: string;
 
   @BeforeInsert()
   @BeforeUpdate()
