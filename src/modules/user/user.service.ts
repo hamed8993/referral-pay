@@ -8,6 +8,8 @@ import { generateReferral } from 'src/common/helpers/generate-referral.helper';
 import { hashPassword } from 'src/common/helpers/hash-password.helper';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
+import { IUpdateUser } from './interface/update.interface';
+import { validatePassword } from 'src/common/helpers/validate-password.helper';
 
 @Injectable()
 export class UserService {
@@ -29,7 +31,7 @@ export class UserService {
     });
   }
 
-  async _createUserIbternal(user: ICreate, repo: Repository<User>) {
+  private async _createUserIbternal(user: ICreate, repo: Repository<User>) {
     if (user.referralCode) {
       const parentUserByRefCode = await repo.findOne({
         where: {
@@ -79,5 +81,46 @@ export class UserService {
         enrollment: EnrollmentStatus.FULLY,
       },
     );
+  }
+
+  async updateUser(body: {
+    user: ValidatedJwtUser;
+    payload: IUpdateUser;
+  }): Promise<any> {
+    const existUser = await this.userRepo.findOne({
+      where: {
+        id: body.user.id,
+      },
+    });
+    if (!existUser) throw new BadRequestException('such a user not found!');
+
+    if (body.payload.password) {
+      if (
+        validatePassword(body.payload.password) &&
+        body.payload.password === body.payload.passwordRepeat 
+      ) {
+        existUser.password = await hashPassword(body.payload.password);
+      } else {
+        throw new BadRequestException(
+          'Password is unCompatible or is not same by repeated password!',
+        );
+      }
+    }
+    if (body.payload.profileImgUrl) {
+      existUser.profileImgUrl = body.payload.profileImgUrl;
+    }
+    if (body.payload.firstName || body.payload.lastName) {
+      existUser.fullName = body.payload.firstName + ' ' + body.payload.lastName;
+    }
+
+    if (
+      !body.payload.password &&
+      !body.payload.profileImgUrl &&
+      !body.payload.firstName &&
+      !body.payload.lastName
+    )
+      return 'you did not updated any thing!';
+
+    return await this.userRepo.save({ ...existUser });
   }
 }

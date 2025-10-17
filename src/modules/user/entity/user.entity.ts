@@ -35,6 +35,9 @@ export class User extends CommonEntity {
   @Column('enum', { enum: UserLevel, default: UserLevel.ONE })
   level: UserLevel;
 
+  @Column({ nullable: true })
+  profileImgUrl: string;
+
   @OneToMany(() => Wallet, (wallet) => wallet.user, { onDelete: 'CASCADE' })
   wallets: Wallet[];
 

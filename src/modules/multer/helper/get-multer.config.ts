@@ -3,6 +3,7 @@ import { diskStorage, FileFilterCallback, Options } from 'multer';
 import * as path from 'path';
 import { Request } from 'express';
 import { GetMulterConfigType } from '../types/get-multer-config-arg.type';
+import { BadRequestException } from '@nestjs/common';
 
 export const getMulterConfig: (options: GetMulterConfigType) => Options = (
   options,
@@ -17,7 +18,7 @@ export const getMulterConfig: (options: GetMulterConfigType) => Options = (
       cb: FileFilterCallback,
     ) => {
       if (options.fileTypes && !options.fileTypes.test(file.mimetype)) {
-        return cb(null, false);
+        return cb(new BadRequestException('File format is incompatible!'));
       }
       cb(null, true);
     },

@@ -1,12 +1,21 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
+import { IsStrongPassword } from '../decorators/password-validation.decorator';
 
-export class CreateDto {
+export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @IsString()
-  @MinLength(8)
+  @IsStrongPassword()
   password: string;
+
+  @IsString()
+  passwordRepeat: string;
 
   @IsOptional()
   @IsString()

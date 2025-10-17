@@ -34,6 +34,12 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
+  async findOne(findCriteria: Partial<Invoice>): Promise<any> {
+    return await this.invoiceRepo.findOne({
+      where: { ...(findCriteria as Invoice) },
+    });
+  }
+
   async updateByInvoiceNumberForUserByError(body: {
     userId: string;
     invoiceNumber: string;
@@ -60,7 +66,7 @@ export class InvoiceService {
       throw new BadRequestException(
         'any invoice not found OR this invoice is not for you!',
       );
-    return await this.invoiceRepo.save({ ...invoice, ...body });
+    return await this.invoiceRepo.save({ ...invoice, ...body.updatePayload });
   }
 
   async findOneByInvoiceAuthority(authority: string): Promise<any> {

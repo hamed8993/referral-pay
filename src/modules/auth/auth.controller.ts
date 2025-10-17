@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { CreateDto } from 'src/modules/user/dto/create.dto';
+import { CreateUserDto } from 'src/modules/user/dto/create.dto';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ValidatedLoginReq } from './interfaces/payload.interface';
@@ -11,14 +11,14 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  async signUp(@Body() body: CreateDto): Promise<any> {
+  async signUp(@Body() body: CreateUserDto): Promise<any> {
     return this.authService.signUp(body);
-  }  
+  }
 
   //Done => after passport
   @Public()
   @UseGuards(LocalAuthGuard)
-  @Post('sigIn')
+  @Post('signIn')
   async signIn(@Request() req): Promise<any> {
     const { id, email }: ValidatedLoginReq = req.user;
     return this.authService.signIn(id, email);

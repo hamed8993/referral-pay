@@ -26,6 +26,10 @@ export class AuthService {
   ) {}
 
   async signUp(body: ICreate): Promise<any> {
+    if (body.password !== body.passwordRepeat)
+      throw new BadRequestException(
+        'password and repeated password are not equal!',
+      );
     const existUserAllready = await this.userService.findOneByEmail(body.email);
     if (existUserAllready)
       throw new BadRequestException('user allready exist!');

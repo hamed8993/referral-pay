@@ -31,8 +31,10 @@ export class TicketController {
     FileInterceptor(
       'doc',
       getMulterConfig({
-        destAfterBase: (req: ExpressRequest) =>
-          (req.user as ValidatedJwtUser).email as string,
+        destAfterBase: 'deposit-docs',
+        uniqueFileName: (req: ExpressRequest) =>
+          `${(req.user as ValidatedJwtUser).email as string}-${Date.now()}`,
+        fileTypes: /^image\/(jpg|jpeg|png|gif|bmp|webp)$/i,
       }),
     ),
   )
