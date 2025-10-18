@@ -77,4 +77,23 @@ export class MailService {
       },
     });
   }
+
+  async sendOtp(data: {
+    otpCode: string;
+    emailAddress: string;
+    title?: string;
+    fullName?: string;
+  }): Promise<any> {
+    await this.mailerService.sendMail({
+      to: data.emailAddress,
+      subject: data.title || `کد یکبار مصرف تایید برداشت از حساب / ثبت نام`,
+      template: './otp-code', // نام فایل تمپلیت
+      context: {
+        date: new Date().toLocaleDateString('fa-IR'),
+        email: data.emailAddress,
+        code: data.otpCode,
+        fullName: data.fullName,
+      },
+    });
+  }
 }

@@ -15,6 +15,9 @@ import { ZarrinpalService } from './strategies/external/bank-zarrinpal.service';
 import { UserModule } from '../user/user.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { PaymentGatewayFactory } from './factory/payment-gateway.factory';
+import { MailModule } from 'src/mailer/mail.module';
+import { OtpModule } from '../otp/otp.module';
+import { QueueModule } from 'src/queue/queue.module';
 
 @Module({
   imports: [
@@ -25,6 +28,8 @@ import { PaymentGatewayFactory } from './factory/payment-gateway.factory';
     WalletModule,
     UserModule,
     TransactionModule,
+    OtpModule,
+    QueueModule
   ],
   controllers: [GatewayController],
   providers: [

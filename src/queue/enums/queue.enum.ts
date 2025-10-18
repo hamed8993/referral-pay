@@ -4,4 +4,7 @@ export enum QueueEnum {
 
   INSTANCE_EMAIL_QUEUE = 'instance-email-processing-queue',
   SEND_INSTANCE_MAIL_JOB = 'send-instance-mail-job',
+
+  OTP_QUEUE = 'otp-queue',
+  OTP_JOB = 'otp-job',
 }

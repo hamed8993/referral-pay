@@ -11,6 +11,9 @@ import { ITransfer } from 'src/modules/transfer/interface/transfer.interface';
 import { DataSource } from 'typeorm';
 import { WalletService } from 'src/modules/wallet/wallet.service';
 import { InvoiceService } from 'src/modules/invoice/invoice.service';
+import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
+import { OtpService } from 'src/modules/otp/opt.service';
+import { EmailProducer } from 'src/queue/producers/email.producer';
 
 @Injectable()
 export class WithdrawCryptoService {
@@ -18,6 +21,8 @@ export class WithdrawCryptoService {
     private invoiceService: InvoiceService,
     private walletService: WalletService,
     private dataSource: DataSource,
+    private otpService: OtpService,
+    private emailProducer: EmailProducer,
   ) {}
 
   async withdrawCrypto(
@@ -47,7 +52,7 @@ export class WithdrawCryptoService {
       );
     if (!withdrawOriginWallet)
       throw new NotAcceptableException(
-        'such a wallet not found OR this wallet is not belong to you!!',
+        'such a origin wallet not found OR this wallet is not belong to you!!',
       );
 
     //2)check if amount is not greater than wallet balance.
@@ -73,7 +78,6 @@ export class WithdrawCryptoService {
       if (user.id !== withdrawDestinationWallet.user.id)
         throw new BadRequestException('This wallet is not belong to you!');
 
-    //Todo=>Email code send......
     //6):
     //6-1)create invoice:
     //6-2)write locked amount in wallet
@@ -81,6 +85,7 @@ export class WithdrawCryptoService {
       const invoice = await this.invoiceService.createInvoiceWithManager(
         manager,
         {
+          status: InvoiceStatus.OTP_PENDING,
           paymentGatewayId: gatewayId,
           type: TransactionType.WITHDRAWAL,
           title: 'localized-title???',
@@ -100,6 +105,17 @@ export class WithdrawCryptoService {
         withdrawOriginWallet.id,
         payload.amount,
       );
+
+      //Todo=> 7)Email code send......
+      await this.emailProducer.addOtpEmailJob({
+        sendTo: user.email,
+        code: await this.otpService.createOpt({
+          withDrawInvoiceId: invoice.id,
+          userId: user.id.toString(),
+        }),
+        fullName: invoice.user.fullName,
+        title: `withdraw to crypto wallet of <${payload.withdrawDestinationWalletAddress}> cart admittion!`,
+      });
 
       return {
         currency: withdrawOriginWallet.type, //UDS,USDT,IRR...

@@ -13,6 +13,9 @@ import { WalletTypeEnum } from 'src/modules/wallet/enum/wallet-type.enum';
 import { WalletService } from 'src/modules/wallet/wallet.service';
 import { DataSource } from 'typeorm';
 import { isAmountGreaterThanUnlockedBalance } from '../../helper/helper';
+import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
+import { OtpService } from 'src/modules/otp/opt.service';
+import { EmailProducer } from 'src/queue/producers/email.producer';
 
 @Injectable()
 export class WithdrawBankCart {
@@ -21,6 +24,8 @@ export class WithdrawBankCart {
     private invoiceService: InvoiceService,
     private walletService: WalletService,
     private dataSource: DataSource,
+    private otpService: OtpService,
+    private emailProducer: EmailProducer,
   ) {}
   async withdrawToBankCart(
     body: ITransfer,
@@ -74,8 +79,6 @@ export class WithdrawBankCart {
         'amount is greater than your IRR-wallet balance!',
       );
 
-    //Todo=>Email code send......
-
     //6):
     //6-1)create invoice
     //6-2)write locked amount in wallet
@@ -83,6 +86,7 @@ export class WithdrawBankCart {
       const invoice = await this.invoiceService.createInvoiceWithManager(
         manager,
         {
+          status: InvoiceStatus.OTP_PENDING,
           paymentGatewayId: gatewayId,
           type: TransactionType.WITHDRAWAL,
           title: 'localized-title???',
@@ -102,6 +106,16 @@ export class WithdrawBankCart {
         payload.amount,
       );
 
+      //Todo=> 7)Email code send......
+      await this.emailProducer.addOtpEmailJob({
+        sendTo: user.email,
+        code: await this.otpService.createOpt({
+          withDrawInvoiceId: invoice.id,
+          userId: user.id.toString(),
+        }),
+        fullName: invoice.user.fullName,
+        title: 'withdraw to bank cart admittion!',
+      });
       return {
         currency: 'IRR',
         invoiceNumber: invoice.invoiceNumber,

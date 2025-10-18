@@ -1,0 +1,113 @@
+<html lang='fa' dir='rtl'>
+  <head>
+    <meta charset='UTF-8' />
+    <title>کد تأیید | {{email}}</title>
+    <style>
+      body {
+        font-family: tahoma, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        direction: rtl;
+      }
+      .container {
+        max-width: 480px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        padding: 16px 24px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .content {
+        padding: 24px;
+        text-align: right;
+      }
+      .greeting {
+        font-size: 15px;
+        margin-bottom: 12px;
+      }
+      .code-box {
+        background: #f1f5f9;
+        border: 2px dashed #2563eb;
+        border-radius: 10px;
+        font-size: 26px;
+        letter-spacing: 4px;
+        text-align: center;
+        padding: 16px 0;
+        color: #1e40af;
+        margin: 24px 0;
+        font-weight: bold;
+      }
+      .note {
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.6;
+      }
+      .footer {
+        margin-top: 24px;
+        font-size: 12px;
+        text-align: center;
+        color: #9ca3af;
+        border-top: 1px solid #e5e7eb;
+        padding: 16px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class='container'>
+      <div class='header'>کد یکبار مصرف شما</div>
+      <div class='content'>
+        <div class='greeting'>
+          {{#if fullName}}
+            {{fullName}}
+            عزیز،
+          {{else}}
+            کاربر گرامی،
+          {{/if}}
+        </div>
+
+        <p>
+          برای ادامه فرایند
+          {{#if title}}
+            {{title}}
+          {{else}}
+            تأیید هویت یا برداشت از حساب
+          {{/if}}
+          ، لطفاً کد زیر را وارد کنید:
+        </p>
+
+        <div class='code-box'>{{code}}</div>
+
+        <p class='note'>
+          این کد تا
+          <strong>۶ دقیقه</strong>
+          معتبر است و پس از آن منقضی می‌شود.
+          <br />
+          لطفاً این کد را در اختیار هیچ‌کس قرار ندهید.
+        </p>
+
+        <p class='note' style='margin-top: 16px'>
+          تاریخ ارسال:
+          {{date}}
+          <br />
+          ایمیل ثبت‌شده:
+          {{email}}
+        </p>
+      </div>
+
+      <div class='footer'>
+        این ایمیل به‌صورت خودکار ارسال شده است. لطفاً به آن پاسخ ندهید.
+      </div>
+    </div>
+  </body>
+</html>

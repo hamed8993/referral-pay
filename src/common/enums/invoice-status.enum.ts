@@ -3,4 +3,5 @@ export enum InvoiceStatus {
   REJECTED = 'rejected',
   SUBMITTED = 'submitted',
   CANCELLED = 'cancelled',
+  OTP_PENDING = 'otp pending',
 }

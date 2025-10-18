@@ -5,10 +5,16 @@ import { QueueEnum } from './enums/queue.enum';
 import { MailModule } from 'src/mailer/mail.module';
 import { DailyEmailConsumer } from './consumers/daily-email.consumer';
 import { InstanceEmailConsumer } from './consumers/instance-email.consumer';
+import { OtpEmailConsumer } from './consumers/otp-email.consumer';
 
 @Module({
   exports: [EmailProducer],
-  providers: [EmailProducer, DailyEmailConsumer, InstanceEmailConsumer],
+  providers: [
+    EmailProducer,
+    DailyEmailConsumer,
+    InstanceEmailConsumer,
+    OtpEmailConsumer,
+  ],
   imports: [
     BullModule.forRootAsync({
       useFactory: () => ({
@@ -23,6 +29,9 @@ import { InstanceEmailConsumer } from './consumers/instance-email.consumer';
     }),
     BullModule.registerQueue({
       name: QueueEnum.INSTANCE_EMAIL_QUEUE,
+    }),
+    BullModule.registerQueue({
+      name: QueueEnum.OTP_QUEUE,
     }),
     MailModule,
   ],
