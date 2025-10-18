@@ -106,7 +106,7 @@ export class WithdrawBankCart {
         payload.amount,
       );
 
-      //Todo=> 7)Email code send......
+      //Done=> 7)Email code send......
       await this.emailProducer.addOtpEmailJob({
         sendTo: user.email,
         code: await this.otpService.createOpt({
