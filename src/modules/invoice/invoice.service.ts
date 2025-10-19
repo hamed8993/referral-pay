@@ -14,6 +14,7 @@ import {
   DeepPartial,
   EntityManager,
   FindOneOptions,
+  FindOptionsWhere,
   Repository,
 } from 'typeorm';
 import { ICreateInvoice } from './interface/create-invoice.interface';
@@ -29,6 +30,10 @@ import { TransactionType } from 'src/common/enums/transaction-type.enum';
 import { EmailProducer } from 'src/queue/producers/email.producer';
 import { ValidatedJwtUser } from 'src/modules/auth/interfaces/payload.interface';
 import { WalletTypeEnum } from '../wallet/enum/wallet-type.enum';
+import {
+  InvoiceRelationLoadType,
+  InvoiceUpdatePayloadType,
+} from './types/invoice-update-payload.type';
 
 @Injectable()
 export class InvoiceService {
@@ -50,21 +55,43 @@ export class InvoiceService {
     });
   }
 
+  async updateInvoceByRelation(
+    findCriterias: FindOptionsWhere<Invoice>,
+    updatePayload: InvoiceUpdatePayloadType,
+    relations?: InvoiceRelationLoadType,
+  ): Promise<Invoice> {
+    const originalInvoice = await this.invoiceRepo.findOne({
+      where: findCriterias,
+      relations,
+    });
+
+    return await this.invoiceRepo.save({
+      ...originalInvoice,
+      ...updatePayload,
+    });
+  }
+
+  async updateInvoceByManagerRelation(
+    manager: EntityManager,
+    findCriterias: FindOptionsWhere<Invoice>,
+    updatePayload: InvoiceUpdatePayloadType,
+    relations?: InvoiceRelationLoadType,
+  ): Promise<Invoice> {
+    const originalInvoice = await manager.findOne(Invoice, {
+      where: findCriterias,
+      relations,
+    });
+
+    return await manager.save(Invoice, {
+      ...originalInvoice,
+      ...updatePayload,
+    });
+  }
+
   async updateByInvoiceNumberForUserByError(body: {
     userId: string;
     invoiceNumber: string;
-    updatePayload: Partial<
-      Pick<
-        Invoice,
-        | 'status'
-        | 'processedAt'
-        | 'processedBy'
-        | 'adminNote'
-        | 'userCancellDescription'
-        | 'transaction'
-        | 'depositDocUrl'
-      >
-    >;
+    updatePayload: InvoiceUpdatePayloadType;
   }): Promise<any> {
     const invoice = await this.invoiceRepo.findOne({
       where: {
@@ -166,7 +193,7 @@ export class InvoiceService {
   async submitPaymentInvoiceByAuthorityByManager(
     manager: EntityManager,
     authority: string,
-    relations?: ('user' | 'transaction' | 'fromWallet' | 'toWallet')[],
+    relations?: InvoiceRelationLoadType,
   ): Promise<any> {
     const invoice = await manager.findOne(Invoice, {
       where: {

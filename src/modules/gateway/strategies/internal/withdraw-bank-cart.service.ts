@@ -122,6 +122,7 @@ export class WithdrawBankCart {
       });
       return {
         otpId: otpToSend.otpSavedRes.id,
+        invoiceId:invoice.id,
         currency: 'IRR',
         invoiceNumber: invoice.invoiceNumber,
         fromWallet: irrWalletForThisUserId,

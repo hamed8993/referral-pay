@@ -8,6 +8,7 @@ import { OtpService } from '../otp.service';
 import { OtpTypeEnum } from '../enum/otp-type.enum';
 import { EmailProducer } from 'src/queue/producers/email.producer';
 import { CartService } from 'src/modules/cart/cart.service';
+import { Invoice } from 'src/modules/invoice/entity/invoice.entity';
 
 @Injectable()
 export class OtpWithdrawService {
@@ -18,32 +19,25 @@ export class OtpWithdrawService {
     private emailProducer: EmailProducer,
     private cartService: CartService,
   ) {}
+
   async handleResend(existOtp: Otp, user: ValidatedJwtUser): Promise<any> {
     //1)If Invoice exists
     // AND is for this user
     // AND Is this OTP for this Invoice
     // AND inspect invoice status that should be <otp pending>...
-    const existInvoice = await this.invoiceService.findOneByRelations(
-      {
-        id: +(existOtp.withDrawInvoiceId as string),
-        user: { id: user.id },
-        status: InvoiceStatus.OTP_PENDING,
-      },
-      ['user', 'fromWallet'],
+    const existInvoice = await this._checkOtpInvoiceUserConsistency(
+      existOtp,
+      user,
     );
-    if (!existInvoice)
-      throw new BadRequestException(
-        'this OTP is not related to you or this invocie!',
-      );
 
-    this.dataSource.transaction(async (manager) => {
+    return this.dataSource.transaction(async (manager) => {
       //2)invalidate this OTP...
       existOtp.used = true;
       manager.save(Otp, existOtp);
 
       //3)create new OTP...
       const otpToSend = await this.otpService.createOtpByManager(manager, {
-        withDrawInvoiceId: existInvoice.id,
+        withDrawInvoiceId: existInvoice.id.toString(),
         userId: user.id.toString(),
         otpType: OtpTypeEnum.WITHDRW,
       });
@@ -69,6 +63,70 @@ export class OtpWithdrawService {
         fullName: existInvoice.user.fullName,
         title: await withDrawTitle(),
       });
+
+      return { otpId: otpToSend.otpSavedRes.id };
     });
+  }
+
+  async handleCodeCorrectInsert(
+    existOtp: Otp,
+    user: ValidatedJwtUser,
+  ): Promise<any> {
+    //1)is this Otp for this Invoice?
+    //1)If Invoice exists
+    // AND is for this user
+    // AND Is this OTP for this Invoice
+    // AND inspect invoice status that should be <otp pending>...
+    const existInvoice = await this._checkOtpInvoiceUserConsistency(
+      existOtp,
+      user,
+    );
+
+    const res = await this.dataSource.transaction(async (manager) => {
+      //2)Update invoce status from OTP-PENDING to PENDING:
+      const updatedInvoce =
+        await this.invoiceService.updateInvoceByManagerRelation(
+          manager,
+          {
+            id: existInvoice.id,
+          },
+          {
+            status: InvoiceStatus.PENDING,
+          },
+        );
+
+      //3)invalidate Otp:
+      const { updatedOtp, result } =
+        await this.otpService.invalidateOtpByManager(
+          manager,
+          existOtp
+        );
+    });
+
+    return 'successfully otp invalidated and ivoice updated....';
+  }
+
+  private async _checkOtpInvoiceUserConsistency(
+    existOtp: Otp,
+    user: ValidatedJwtUser,
+  ): Promise<Invoice> {
+    //1)If Invoice exists
+    // AND is for this user
+    // AND Is this OTP for this Invoice
+    // AND inspect invoice status that should be <otp pending>...
+    const existInvoice = await this.invoiceService.findOneByRelations(
+      {
+        id: +(existOtp.withDrawInvoiceId as string),
+        user: { id: user.id },
+        status: InvoiceStatus.OTP_PENDING,
+      },
+      ['user', 'fromWallet'],
+    );
+    if (!existInvoice)
+      throw new BadRequestException(
+        'this OTP is not related to you or this invocie!',
+      );
+
+    return existInvoice;
   }
 }
