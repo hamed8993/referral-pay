@@ -49,7 +49,6 @@ export class OtpWithdrawService {
       });
 
       const withDrawTitle = async () => {
-        console.log('existInvoice>>>', existInvoice);
         if (existInvoice.toWalletAddress) {
           return `from <${existInvoice.fromWallet.id}> to <${existInvoice.toWalletAddress}> wallet address`;
         } else if (existInvoice.toBankCartId) {
