@@ -14,8 +14,9 @@ import { WalletService } from 'src/modules/wallet/wallet.service';
 import { DataSource } from 'typeorm';
 import { isAmountGreaterThanUnlockedBalance } from '../../helper/helper';
 import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
-import { OtpService } from 'src/modules/otp/opt.service';
+import { OtpService } from 'src/modules/otp/otp.service';
 import { EmailProducer } from 'src/queue/producers/email.producer';
+import { OtpTypeEnum } from 'src/modules/otp/enum/otp-type.enum';
 
 @Injectable()
 export class WithdrawBankCart {
@@ -107,16 +108,20 @@ export class WithdrawBankCart {
       );
 
       //Done=> 7)Email code send......
+      const otpToSend = await this.otpService.createOtp({
+        withDrawInvoiceId: invoice.id,
+        userId: user.id.toString(),
+        otpType: OtpTypeEnum.WITHDRW,
+      });
+
       await this.emailProducer.addOtpEmailJob({
         sendTo: user.email,
-        code: await this.otpService.createOpt({
-          withDrawInvoiceId: invoice.id,
-          userId: user.id.toString(),
-        }),
+        code: otpToSend.rawOtpCode,
         fullName: invoice.user.fullName,
         title: 'withdraw to bank cart admittion!',
       });
       return {
+        otpId: otpToSend.otpSavedRes.id,
         currency: 'IRR',
         invoiceNumber: invoice.invoiceNumber,
         fromWallet: irrWalletForThisUserId,

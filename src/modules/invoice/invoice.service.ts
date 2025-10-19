@@ -9,7 +9,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entity/invoice.entity';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import {
+  DataSource,
+  DeepPartial,
+  EntityManager,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
 import { ICreateInvoice } from './interface/create-invoice.interface';
 import { UserService } from 'src/modules/user/user.service';
 import { ICancellInvoice } from './interface/cancell-invoice.interface';
@@ -34,9 +40,13 @@ export class InvoiceService {
     private emailProducer: EmailProducer,
   ) {}
 
-  async findOne(findCriteria: Partial<Invoice>): Promise<any> {
+  async findOneByRelations(
+    findCriteria: DeepPartial<Invoice>,
+    relations?: ('user' | 'transaction' | 'fromWallet' | 'toWallet')[],
+  ): Promise<any> {
     return await this.invoiceRepo.findOne({
       where: { ...(findCriteria as Invoice) },
+      relations,
     });
   }
 
@@ -156,7 +166,7 @@ export class InvoiceService {
   async submitPaymentInvoiceByAuthorityByManager(
     manager: EntityManager,
     authority: string,
-    relations: ('user' | 'transaction' | 'fromWallet' | 'toWallet')[],
+    relations?: ('user' | 'transaction' | 'fromWallet' | 'toWallet')[],
   ): Promise<any> {
     const invoice = await manager.findOne(Invoice, {
       where: {

@@ -1,5 +1,6 @@
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity } from 'typeorm';
+import { OtpTypeEnum } from '../enum/otp-type.enum';
 
 @Entity()
 export class Otp extends CommonEntity {
@@ -9,8 +10,11 @@ export class Otp extends CommonEntity {
   @Column()
   userId: string;
 
+  @Column({ type: 'enum', enum: OtpTypeEnum })
+  type: OtpTypeEnum;
+
   @Column()
-  withDrawInvoiceId: string;
+  withDrawInvoiceId?: string;
 
   @Column({ type: 'timestamp' })
   expiresAt: Date;
