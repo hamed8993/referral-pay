@@ -1,6 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule } from '@nestjs/swagger';
+import {
+  swaggerConfig,
+  swaggerCustomOptions,
+  swaggerDocumentOptions,
+} from 'swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +16,12 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  const swaggerDocumentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig, swaggerDocumentOptions);
+  // swaggerDocumentFactory.security = [{ authorization: [] }];
+  SwaggerModule.setup('api', app, swaggerDocumentFactory, swaggerCustomOptions);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
