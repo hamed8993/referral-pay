@@ -69,14 +69,14 @@ export class AuthService {
     };
   }
 
-  async generateTokensForLogin(id: number, email: string) {
+  private async _generateTokensForLogin(id: number, email: string) {
     const payload: AuthJwtPayload = { sub: id, email };
     const accessToken = await this.jwtService.signAsync(payload);
     return accessToken;
   }
 
-  async signIn(id: number, email: string) {
-    const accessToken = await this.generateTokensForLogin(id, email);
+  async signIn(id: number, email: string): Promise<string> {
+    const accessToken = await this._generateTokensForLogin(id, email);
     return accessToken;
   }
 

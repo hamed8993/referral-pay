@@ -7,6 +7,7 @@ import {
   swaggerCustomOptions,
   swaggerDocumentOptions,
 } from 'swagger.config';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,8 @@ async function bootstrap() {
     SwaggerModule.createDocument(app, swaggerConfig, swaggerDocumentOptions);
   // swaggerDocumentFactory.security = [{ authorization: [] }];
   SwaggerModule.setup('api', app, swaggerDocumentFactory, swaggerCustomOptions);
+
+   app.useGlobalInterceptors(new ResponseInterceptor());
 
   await app.listen(process.env.PORT ?? 3000);
 }

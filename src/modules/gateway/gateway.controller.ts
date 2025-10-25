@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { GatewayService } from './gateway.service';
-import { CreateGatewayDto } from './dto/create-gateway.dto';
+import { CreateGatewayDto } from './dto/requests/create-gateway.dto';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from '../auth/decorators/role.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';

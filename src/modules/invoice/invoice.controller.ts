@@ -1,8 +1,8 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { CancellInvoiceDto } from './dto/cancell-invoice.dto';
-import { ProcessInvoiceDto } from './dto/process-invoice.dto';
+import { CreateInvoiceDto } from './dto/requests/create-invoice.dto';
+import { CancellInvoiceDto } from './dto/requests/cancell-invoice.dto';
+import { ProcessInvoiceDto } from './dto/requests/process-invoice.dto';
 import { RoleGuard } from 'src/modules/auth/guards/role.guard';
 import { Roles } from 'src/modules/auth/decorators/role.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';

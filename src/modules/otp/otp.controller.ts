@@ -1,8 +1,8 @@
 import { Body, Controller, Post, Request } from '@nestjs/common';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
-import { OtpResendDto } from './dto/otp-resend.dto';
+import { OtpResendDto } from './dto/requests/otp-resend.dto';
 import { OtpDispatcherService } from './otp-dispatcher.service';
-import { OtpCodeInsertDto } from './dto/otp-code-insert.dto';
+import { OtpCodeInsertDto } from './dto/requests/otp-code-insert.dto';
 
 @Controller('otp')
 export class OtpController {

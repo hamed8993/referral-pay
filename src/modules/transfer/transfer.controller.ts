@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Request } from '@nestjs/common';
-import { TransferDto } from './dto/transfer.dto';
+import { TransferDto } from './dto/requests/transfer.dto';
 import { TransferService } from './transfer.service';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
 

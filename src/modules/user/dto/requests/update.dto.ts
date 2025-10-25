@@ -1,5 +1,5 @@
 import { IsOptional, IsString } from 'class-validator';
-import { IsStrongPassword } from '../decorators/password-validation.decorator';
+import { IsStrongPassword } from '../../decorators/password-validation.decorator';
 
 export class UpdateUserDto {
   @IsOptional()

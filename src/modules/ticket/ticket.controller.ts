@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { DepositDocDto } from './dto/deposit-doc-dto';
+import { DepositDocDto } from './dto/requests/deposit-doc-dto';
 import { diskStorage } from 'multer';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';

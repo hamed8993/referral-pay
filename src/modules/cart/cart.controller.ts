@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Request } from '@nestjs/common';
-import { CreateCartDto } from './dto/create-cart.dto';
+import { CreateCartDto } from './dto/requests/create-cart.dto';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
 import { CartService } from './cart.service';
 
