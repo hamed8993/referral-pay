@@ -22,8 +22,9 @@ import {
 import { FullRegisterResDto } from './dto/responses/full-register.dto';
 import { UpoadProfileDto } from './dto/requests/upload-profile.dto';
 import { UploadProfileResponseDto } from './dto/responses/upload-profile.response.dto';
+import { securitySchemeName } from 'swagger.config';
 
-@ApiBearerAuth('authorizationToken')
+@ApiBearerAuth(securitySchemeName)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}

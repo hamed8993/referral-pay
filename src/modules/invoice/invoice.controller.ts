@@ -17,8 +17,9 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CancellInvoiceResponseDto } from './dto/responses/cancell-invoice.response.dto';
+import { securitySchemeName } from 'swagger.config';
 
-@ApiBearerAuth('authorizationToken')
+@ApiBearerAuth(securitySchemeName)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('invoice')
 export class InvoiceController {

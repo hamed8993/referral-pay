@@ -4,6 +4,9 @@ import {
   SwaggerDocumentOptions,
 } from '@nestjs/swagger';
 
+export const securitySchemeName: string =
+  process.env.SWAGGER_SECURITY_SCHEME_NAME || 'authorizationToken2';
+
 export const swaggerConfig = new DocumentBuilder()
   .setTitle('Referral broker example')
   .setDescription('The Referral broker API description')
@@ -15,7 +18,7 @@ export const swaggerConfig = new DocumentBuilder()
       scheme: 'bearer', //'bearer' | 'basic' | 'digest' | 'negotiate' | 'ntlm'
       bearerFormat: 'JWT', //'JWT' | 'JWTFFF' | 'MyCustomToken' | string => بی مصرف! فقط در جیسونش درج میشه!
     },
-    'authorizationToken',
+    securitySchemeName,
   )
   //   .addSecurityRequirements('111authorization111')
   .build();
