@@ -23,7 +23,7 @@ export interface ICreateInvoice {
 
   paymentGatewayAuthority?: string;
 
-  user: User;
+  user: Partial<User>;
 
   fromWallet?: Wallet;
 

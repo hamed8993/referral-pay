@@ -12,6 +12,7 @@ import {
 import { Decimal } from 'decimal.js';
 import { SharedInvoiceTranaction } from 'src/common/entities/shared-invoice-tranaction.entity';
 import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Invoice extends SharedInvoiceTranaction {
@@ -37,15 +38,17 @@ export class Invoice extends SharedInvoiceTranaction {
   @Column()
   paymentGatewayId: string;
 
+  @Exclude()
   @Column({ nullable: true })
   paymentGatewayAuthority: string;
 
   @Column({ nullable: true })
-  paymentReference: string;//?????
+  paymentReference: string; //?????
 
   @Column({ nullable: true })
   userCancellDescription: string;
 
+  @Exclude()
   @Column({ nullable: true })
   processedBy: number;
 
@@ -74,16 +77,9 @@ export class Invoice extends SharedInvoiceTranaction {
   toWallet: Wallet;
 
   @Column('decimal', { precision: 18, scale: 2 })
-  private _totalAmount: number;
+  totalAmount: number;
 
-  get totalAmount(): number {
-    return this._totalAmount;
-  }
-
-  private set totalAmount(value: number) {
-    this._totalAmount = value;
-  }
-
+  @Exclude()
   @Column({ nullable: true, default: null })
   depositDocUrl: string;
 

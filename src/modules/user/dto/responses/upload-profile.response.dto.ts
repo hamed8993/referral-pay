@@ -2,15 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { IControllerResponse } from 'src/common/interface/api-response.interface';
 
-class LoginResponse {
+class RawData4 {
   @ApiProperty()
-  accessToken: string;
+  fullName?: string;
+
+  @ApiProperty()
+  imageAddress: string;
 }
 
-export class LoginResponseDto
+export class UploadProfileResponseDto
   extends ApiResponseDto
-  implements IControllerResponse<LoginResponse>
+  implements IControllerResponse<RawData4>
 {
   @ApiProperty()
-  data: LoginResponse;
+  data: RawData4;
 }

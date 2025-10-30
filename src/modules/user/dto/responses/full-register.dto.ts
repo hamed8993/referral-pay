@@ -3,7 +3,7 @@ import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { IControllerResponse } from 'src/common/interface/api-response.interface';
 
-class Data {
+class RawData3 {
   @ApiProperty()
   fullName: string;
 
@@ -16,8 +16,8 @@ class Data {
 
 export class FullRegisterResDto
   extends ApiResponseDto
-  implements IControllerResponse<Data>
+  implements IControllerResponse<RawData3>
 {
   @ApiProperty()
-  data: Data;
+  data: RawData3;
 }

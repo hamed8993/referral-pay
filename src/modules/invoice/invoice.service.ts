@@ -224,8 +224,9 @@ export class InvoiceService {
       },
     });
     if (!existInvoice) throw new NotFoundException('Such a invoice not exist!');
-    ((existInvoice.status = InvoiceStatus.CANCELLED),
-      (existInvoice.userCancellDescription = body.userCancellDescription));
+    existInvoice.status = InvoiceStatus.CANCELLED;
+    existInvoice.userCancellDescription = body.userCancellDescription || '';
+
     return await this.invoiceRepo.save(existInvoice);
   }
 

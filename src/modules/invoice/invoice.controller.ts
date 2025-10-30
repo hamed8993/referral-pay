@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/requests/create-invoice.dto';
 import { CancellInvoiceDto } from './dto/requests/cancell-invoice.dto';
@@ -7,72 +15,25 @@ import { RoleGuard } from 'src/modules/auth/guards/role.guard';
 import { Roles } from 'src/modules/auth/decorators/role.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { ValidatedJwtUser } from '../auth/interfaces/payload.interface';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { CancellInvoiceResponseDto } from './dto/responses/cancell-invoice.response.dto';
 
+@ApiBearerAuth('authorizationToken')
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('invoice')
 export class InvoiceController {
   constructor(private invoiceService: InvoiceService) {}
 
-  // @Post('/fiat/deposit')
-  // async handlePaymentDeposit() {
-  //   //pay mony from my bank account for deposit my system wallet
-  //   //online => not works.
-  //   // OR
-  //   // cartToCart/ShensaDar=>admin approve => server sends "cartToCart/ShenseDar" then just user should approve that i deposited.
-  // }
-
-  // @Post('/currency/deposit')
-  // async handleFiatDeposit() {
-  //   // Dto:{
-  //   //   currency,
-  //   //   network,
-  //   //   amount,
-  //   //return address for this before deposit for deposit  => receive from blockchain nework
-  //   // }
-  // }
-
-  // @Post('/fiat/withdraw')
-  // async handleFiatWithdraw() {
-  //   //withdraw from my wallet to system's main wallet for pay back mony into my bank account
-  //   // Dto:{
-  //   //    amount
-  //   //    bank-card
-  //   //    fee? => from inserted amount => will go to selected bank by shaba after awhile.
-  //   // }
-  // }
-
-  // @Post('/currency/withdraw')
-  // async handleCurrencyWithdraw() {
-  //   //withdraw from my wallet to system's main wallet for pay back mony into my bank account
-  //   // Dto:{
-  //   //   currency,
-  //   //   network,
-  //   //   destinationAddress,
-  //   //   amount,
-  //   //   networkFee ???
-  //   // }
-  // }
-
-  // @Post('transfer')
-  // async exchangeCurrency(@Body() body: TransferDto, @Request() req) {
-  //   const user: ValidatedJwtUser = req.user;
-  //   return await this.invoiceService.exchangeCurrency(body, user);
-  // }
-
-  // async createInvoice(
-  //   @Body() body: CreateInvoiceDto,
-  //   @Request() req,
-  // ): Promise<any> {
-  //   return await this.invoiceService.createInvoice(body, req.user);
-  // }
-
   //Done=>insert user by cookie
+  @ApiResponse({ type: CancellInvoiceResponseDto })
   @Post('cancell')
   async cancellInvoice(
     @Body() body: CancellInvoiceDto,
     @Request() req,
-  ): Promise<any> {
+  ): Promise<CancellInvoiceResponseDto> {
     const user: ValidatedJwtUser = req.user;
-    return await this.invoiceService.cancellInvoiceByUser(body, user);
+    const res = await this.invoiceService.cancellInvoiceByUser(body, user);
+    return { data: res };
   }
 
   //Done=>insert admin by cookie

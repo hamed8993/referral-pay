@@ -1,4 +1,4 @@
 export interface ICancellInvoice {
   invoiceNumber: string;
-  userCancellDescription: string;
+  userCancellDescription?: string;
 }

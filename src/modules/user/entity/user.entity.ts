@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { RoleEnum } from 'src/common/enums/role.enum';
@@ -14,6 +15,7 @@ export class User extends CommonEntity {
   @Column({ unique: true })
   email: string;
 
+  @Exclude()
   @Column()
   password: string;
 
@@ -60,9 +62,5 @@ export class User extends CommonEntity {
     onDelete: 'CASCADE',
   })
   carts: Cart[];
-  // @OneToMany(
-  //   () => DepositAddress,
-  //   (depositAddresses) => depositAddresses.user,{nullable:true}
-  // )
-  // depositAddresses: DepositAddress[];
+  
 }
