@@ -35,10 +35,9 @@ export class WalletService {
     const walletsArray: Wallet[] = [];
 
     for (const walletType of getCurrenciesArray) {
-      console.log('walletType>>>', walletType);
       const newWallet = await manager.getRepository(Wallet).create({
         user: user,
-        name: walletType, //Translate???
+        name: walletType,
         balance: 0,
       });
 
