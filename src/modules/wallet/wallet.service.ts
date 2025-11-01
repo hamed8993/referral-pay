@@ -32,27 +32,19 @@ export class WalletService {
     user: User,
     manager: EntityManager,
   ): Promise<any> {
-    const walletsArray: // any[]
-    {
-      // name: WalletCategoryEnum;
-      currencies: WalletCurrencyEnum[];
-    }[] = [];
-    // for (const catName of getWalletCategoriesArray) {
-    //   console.log('catName>>>>>', catName);
-    //   const wallet = await manager.getRepository(Wallet).save({
-    //     user: user,
-    //     name: catName, //Translate???
-    //     balance: 0,
-    //     is_systemic: true,
-    //     currencies: getCurrenciesArray,
-    //     walletCategory: catName,
-    //   });
+    const walletsArray: Wallet[] = [];
 
-    //   walletsArray.push({
-    //     currencies: wallet.currencies,
-    //     name: wallet.name,
-    //   });
-    // }
+    for (const walletType of getCurrenciesArray) {
+      const newWallet = await manager.getRepository(Wallet).create({
+        user: user,
+        name: walletType,
+        balance: 0,
+      });
+
+      const wallet = await manager.getRepository(Wallet).save(newWallet);
+
+      walletsArray.push(wallet);
+    }
     return walletsArray;
   }
 
@@ -131,12 +123,13 @@ export class WalletService {
   async depositWalletByUserByManagerByError(
     manager: EntityManager,
     body: { userId: string; walletType: WalletTypeEnum; amount: number },
-    relations:
-      ( 'user'
+    relations: (
+      | 'user'
       | 'outgoingTrxs'
       | 'incomingTrxs'
       | 'incomingInvoices'
-      | 'outgoingInvoices')[],
+      | 'outgoingInvoices'
+    )[],
   ): Promise<any> {
     const wallet = await manager.findOne(Wallet, {
       where: {

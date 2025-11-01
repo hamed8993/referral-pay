@@ -45,7 +45,8 @@ export class AuthService {
       );
 
       return {
-        walletsList,
+        createdUser,
+        walletsList
       };
     });
     return res;
