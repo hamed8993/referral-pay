@@ -1,7 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
+import { WalletStatus } from 'src/common/enums/wallet-status.enum';
 import { IControllerResponse } from 'src/common/interface/api-response.interface';
+import { Wallet } from 'src/modules/wallet/entity/wallet.entity';
+import { WalletTypeEnum } from 'src/modules/wallet/enum/wallet-type.enum';
+
+class WalletData implements Partial<Wallet> {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  balance: number;
+
+  @ApiProperty()
+  lockedBalance: number;
+
+  @ApiProperty()
+  status: WalletStatus;
+
+  @ApiProperty()
+  type: WalletTypeEnum;
+}
 
 class RawData2 {
   @ApiProperty()
@@ -12,6 +35,9 @@ class RawData2 {
     example: EnrollmentStatus.BASIC,
   })
   enrollment: EnrollmentStatus;
+
+  @ApiProperty()
+  walletsList: WalletData;
 }
 
 export class SignUpResponseDto

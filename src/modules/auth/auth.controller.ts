@@ -8,6 +8,7 @@ import { LoginResponseDto } from '../user/dto/responses/login.response.dto';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from '../user/dto/requests/login.dto';
 import { SignUpResponseDto } from './dto/reponse/sign-up.response.dto';
+import { Wallet } from '../wallet/entity/wallet.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -22,8 +23,18 @@ export class AuthController {
     const res = await this.authService.signUp(body);
     return {
       data: {
-        enrollment: res.enrollment,
-        email: res.user,
+        walletsList: res.walletsList.map(
+          ({ id, name, balance, lockedBalance, status, type }: Wallet) => ({
+            id,
+            name,
+            balance,
+            lockedBalance,
+            status,
+            type,
+          }),
+        ),
+        enrollment: res.createdUser.enrollment,
+        email: res.createdUser.email,
       },
     };
   }

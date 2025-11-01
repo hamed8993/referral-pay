@@ -14,4 +14,4 @@ export enum WalletCurrencyEnum {
   // ETH = 'ETH',
 }
 
-export const getCurrenciesArray = Object.values(WalletCurrencyEnum);
+export const getCurrenciesArray = Object.values(WalletCurrencyEnum) as WalletCurrencyEnum[];;
