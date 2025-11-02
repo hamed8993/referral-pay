@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
+import { CommonApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { IControllerResponse } from 'src/common/interface/api-response.interface';
 
 class RawData4 {
@@ -11,7 +11,7 @@ class RawData4 {
 }
 
 export class UploadProfileResponseDto
-  extends ApiResponseDto
+  extends CommonApiResponseDto
   implements IControllerResponse<RawData4>
 {
   @ApiProperty()

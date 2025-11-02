@@ -11,7 +11,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { DepositDocDto } from './dto/requests/deposit-doc-dto';
+import {
+  DepositDocBodyDto,
+  UploadDocDto,
+} from './dto/requests/deposit-doc.dto';
 import { diskStorage } from 'multer';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
@@ -21,7 +24,11 @@ import { existsSync, mkdirSync } from 'fs';
 import { MulterService } from '../multer/multer.service';
 import { getMulterConfig } from '../multer/helper/get-multer.config';
 import { TicketService } from './ticket.service';
+import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { securitySchemeName } from 'swagger.config';
+import { UploadDepositDocDto } from './dto/responses/deposit-doc.response.dto';
 
+@ApiBearerAuth(securitySchemeName)
 @Controller('ticket')
 export class TicketController {
   constructor(private ticketService: TicketService) {}
@@ -38,16 +45,23 @@ export class TicketController {
       }),
     ),
   )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: UploadDocDto,
+  })
   async uploadDepositDoc(
     @UploadedFile() doc: Express.Multer.File,
-    @Body() body: DepositDocDto,
+    @Body() body: DepositDocBodyDto,
     @Request() req,
-  ): Promise<any> {
+  ): Promise<UploadDepositDocDto> {
     const user: ValidatedJwtUser = req.user;
-    return await this.ticketService.registerDepositInvoiceDoc(
+    const res = await this.ticketService.registerDepositInvoiceDoc(
       doc.destination,
       body.invoiceNumber,
       user.id.toString(),
     );
+    return {
+      data: { depositDocUrl: res.depositDocUrl },
+    };
   }
 }

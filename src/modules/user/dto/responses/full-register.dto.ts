@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
+import { CommonApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { IControllerResponse } from 'src/common/interface/api-response.interface';
 
@@ -15,7 +15,7 @@ class RawData3 {
 }
 
 export class FullRegisterResDto
-  extends ApiResponseDto
+  extends CommonApiResponseDto
   implements IControllerResponse<RawData3>
 {
   @ApiProperty()

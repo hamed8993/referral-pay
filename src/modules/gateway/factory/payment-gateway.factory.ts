@@ -4,7 +4,7 @@ import { ZarrinpalService } from '../strategies/external/bank-zarrinpal.service'
 import { IGatewayCallback } from '../interface/gateway.interface';
 
 @Injectable()
-export class PaymentGatewayFactory {
+export class  PaymentGatewayFactory {
   constructor(
     private zarrinpalService: ZarrinpalService,
     // private paypalService: PaypalService,

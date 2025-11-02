@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
+import { CommonApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { WalletStatus } from 'src/common/enums/wallet-status.enum';
 import { IControllerResponse } from 'src/common/interface/api-response.interface';
@@ -41,7 +41,7 @@ class RawData2 {
 }
 
 export class SignUpResponseDto
-  extends ApiResponseDto
+  extends CommonApiResponseDto
   implements IControllerResponse<RawData2>
 {
   @ApiProperty()

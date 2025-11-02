@@ -1,7 +1,6 @@
-import { IsEnum, IsString, ValidateIf } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { IsEnum, IsString } from 'class-validator';
 import { GatewayType } from 'src/common/enums/gateway-type.enum';
-import { Column } from 'typeorm';
+import { PartialType } from '@nestjs/swagger';
 
 class BaseGatewayDto {
   @IsString()
