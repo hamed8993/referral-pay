@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dto/responses/api-response.dto';
+import { CommonApiResponseDto } from 'src/common/dto/responses/api-response.dto';
 import { InvoiceStatus } from 'src/common/enums/invoice-status.enum';
 import { Invoice } from '../../entity/invoice.entity';
 import { PartialType, PickType } from '@nestjs/mapped-types';
@@ -86,7 +86,7 @@ class RawData1 {
   toBankCartId?: string;
 }
 
-export class CancellInvoiceResponseDto extends ApiResponseDto {
+export class CancellInvoiceResponseDto extends CommonApiResponseDto {
   @ApiProperty()
   data: RawData1;
 }

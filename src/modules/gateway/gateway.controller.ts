@@ -1,19 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { GatewayService } from './gateway.service';
 import { CreateGatewayDto } from './dto/requests/create-gateway.dto';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from '../auth/decorators/role.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { Public } from '../auth/decorators/public.decorator';
-import { Request, Response } from 'express';
+import { Request } from 'express';
+import { CreateGatewayResponseDto } from './dto/responses/create-gateway.response.dto';
 
 @Controller('gateway')
 export class GatewayController {
@@ -22,8 +15,13 @@ export class GatewayController {
   @Roles(RoleEnum.ADMIN)
   @UseGuards(RoleGuard)
   @Post('create')
-  async createGateway(@Body() body: CreateGatewayDto): Promise<any> {
-    return await this.gatewayService.createGateway(body);
+  // @ApiResponse({ type: CreateGatewayResponseDto })
+  async createGateway(
+    @Body() body: CreateGatewayDto,
+  ): Promise<CreateGatewayResponseDto> {
+    return {
+      data: await this.gatewayService.createGateway(body),
+    };
   }
 
   // @Post('payment')

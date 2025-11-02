@@ -69,11 +69,17 @@ export class GatewayService {
       req.query.Authority as string,
     );
 
+    if (!invoice)
+      throw new NotFoundException(
+        'Could not find any Invoice by this Authority!',
+      );
+
     const gateway = await this.gatewayRepo.findOne({
       where: {
         id: invoice.paymentGatewayId,
       },
     });
+
     if (!gateway)
       throw new NotFoundException(
         'Could not find any Gateway for this Invoice!',
@@ -82,63 +88,12 @@ export class GatewayService {
     const gatewayService = this.paymentGatewayFactory.getGateway(
       gateway.provider,
     );
+
     const callbackRes: PaymentCallbackResponse =
       await gatewayService.extractCallbackData(req);
 
-    if (callbackRes.status === 'OK') {
-      const verificationRes: PaymentVerifyResponse =
-        await gatewayService.verifyPayment({
-          invoiceTotalAmount: invoice.totalAmount,
-          invoicePaymentAuthority: invoice.paymentGatewayAuthority,
-        });
-
-      // if (verificationRes.code == 100 || verificationRes.code == 101) {
-      if (verificationRes.success) {
-        return this.dataSource.transaction(async (manager) => {
-          //1)update invoice by <req.query.Authority> to submitted
-          const submittedInvoice =
-            await this.invoiceService.submitPaymentInvoiceByAuthorityByManager(
-              manager,
-              req.query.Authority as string,
-              ['user'],
-            );
-          //2)update wallet
-          const updatedWallet =
-            await this.walletService.depositWalletByUserByManagerByError(
-              manager,
-              {
-                userId: submittedInvoice.user.id,
-                walletType: WalletTypeEnum.IRR,
-                amount: submittedInvoice.totalAmount,
-              },
-              ['user'],
-            );
-          // 3)create transaction
-          const newTransaction =
-            await this.transactionService.createTransactionByManager(manager, {
-              amount: submittedInvoice.totalAmount,
-              title: submittedInvoice.title || 'def title', //????????
-              type: TransactionType.DEPOSIT,
-              transactionTracingCode: verificationRes.referenceId as string,
-              toWallet: updatedWallet,
-              invoice: submittedInvoice,
-              user: updatedWallet.user,
-            });
-          return {
-            id: newTransaction.id,
-            created_at: newTransaction.created_at,
-            tracingCode: newTransaction.transactionTracingCode,
-            invoiceId: newTransaction.invoiceId,
-          };
-        });
-        //return where????
-      } else {
-        //update invoice by <req.query.Authority> to cancelled
-        await this.invoiceService.cancellPaymentInvoiceByAuthorityOrError(
-          req.query.Authority as string,
-        );
-      }
-    } else {
+    if (callbackRes.status !== 'OK') {
+      //== callbackRes.status== "FAILED" || callbackRes.status== "CANCELLED"
       //update invoice by <req.query.Authority> to cancelled
       const cancelledInvoice =
         await this.invoiceService.cancellPaymentInvoiceByAuthorityOrError(
@@ -147,5 +102,60 @@ export class GatewayService {
       //return where????
       return cancelledInvoice;
     }
+
+    const verificationRes: PaymentVerifyResponse =
+      await gatewayService.verifyPayment({
+        invoiceTotalAmount: invoice.totalAmount,
+        invoicePaymentAuthority: invoice.paymentGatewayAuthority,
+      });
+
+    if (!verificationRes.success) {
+      //update invoice by <req.query.Authority> to cancelled
+      const cancelledInvoice =
+        await this.invoiceService.cancellPaymentInvoiceByAuthorityOrError(
+          req.query.Authority as string,
+        );
+      //return where????
+      return cancelledInvoice;
+    }
+
+    // if (verificationRes.code == 100 || verificationRes.code == 101) {
+    return this.dataSource.transaction(async (manager) => {
+      //1)update invoice by <req.query.Authority> to submitted
+      const submittedInvoice =
+        await this.invoiceService.submitPaymentInvoiceByAuthorityByManager(
+          manager,
+          req.query.Authority as string,
+          ['user'],
+        );
+      //2)update wallet
+      const updatedWallet =
+        await this.walletService.depositWalletByUserByManagerByError(
+          manager,
+          {
+            userId: submittedInvoice.user.id,
+            walletType: WalletTypeEnum.IRR,
+            amount: submittedInvoice.totalAmount,
+          },
+          ['user'],
+        );
+      // 3)create transaction
+      const newTransaction =
+        await this.transactionService.createTransactionByManager(manager, {
+          amount: submittedInvoice.totalAmount,
+          title: submittedInvoice.title || 'def title', //????????
+          type: TransactionType.DEPOSIT,
+          transactionTracingCode: verificationRes.referenceId as string,
+          toWallet: updatedWallet,
+          invoice: submittedInvoice,
+          user: updatedWallet.user,
+        });
+      return {
+        id: newTransaction.id,
+        created_at: newTransaction.created_at,
+        tracingCode: newTransaction.transactionTracingCode,
+        invoiceId: newTransaction.invoiceId,
+      };
+    });
   }
 }
